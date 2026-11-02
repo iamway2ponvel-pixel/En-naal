@@ -790,7 +790,7 @@ function filteredTrans(){
 function renderTrans(){
  const list=$('#transList');list.innerHTML='';thumbURLs.splice(0).forEach(u=>URL.revokeObjectURL(u));
  const month=$('#monthFilter').value||'',day=$('#dayFilter').value||'',arr=filteredTrans();
- const total=arr.reduce((s,e)=>s+(Number(e.amount||0),0),en=language==='en';
+ const total=arr.reduce((s,e)=>s+Number(e.amount||0),0),en=language==='en';
  $('#monthSummary').textContent=`${month||(en?'All months':'எல்லா மாதங்களும்')}${day?' · '+day:''} | ${arr.length} ${en?'records':'பதிவுகள்'} | ${en?'Total':'மொத்தம்'} ${money(total)}`;
  if(!arr.length)list.innerHTML=`<p class="muted">${en?'No records for this date':'இந்த தேதியில் பதிவுகள் இல்லை'}</p>`;
  arr.forEach(e=>{

@@ -1,18 +1,55 @@
-const CACHE='en-naal-v9-1';
-const CORE=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
-self.addEventListener('fetch',e=>{
-  const r=e.request;if(r.method!=='GET')return;
-  const isDoc=r.mode==='navigate'||r.destination==='document';
-  if(isDoc){
-    // Network first: new versions appear on the very next open; cache is the offline fallback.
-    e.respondWith(fetch(r).then(res=>{if(res&&res.ok){const cp=res.clone();caches.open(CACHE).then(c=>c.put('./index.html',cp));}return res;})
-      .catch(()=>caches.match('./index.html').then(h=>h||caches.match('./'))));
+const CACHE = 'en-naal-v9-2';
+const CORE = ['./', './index.html'];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => cache.addAll(CORE))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const isDocument = request.mode === 'navigate' || request.destination === 'document';
+
+  if (isDocument) {
+    // Network-first for pages; use the last cached page when offline.
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then(cache => cache.put('./index.html', copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match('./index.html').then(cached => cached || caches.match('./')))
+    );
     return;
   }
-  e.respondWith(caches.match(r,{ignoreSearch:true}).then(hit=>{
-    const net=fetch(r).then(res=>{if(res&&(res.ok||res.type==='opaque')){const cp=res.clone();caches.open(CACHE).then(r,cp));}return res;}).catch(()=>hit);
-    return hit||net;
-  }));
+
+  // Cache-first for assets; refresh the cache when the network is available.
+  event.respondWith(
+    caches.match(request, { ignoreSearch: true }).then(cached => {
+      const network = fetch(request).then(response => {
+        if (response && (response.ok || response.type === 'opaque')) {
+          const copy = response.clone();
+          caches.open(CACHE).then(cache => cache.put(request, copy));
+        }
+        return response;
+      });
+      return cached || network;
+    }).catch(() => caches.match(request, { ignoreSearch: true }))
+  );
 });
