@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E6B5B">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<title>என் நாள் - வரவு செலவு, கடன், சேமிப்பு</title>
+<script>try{if(localStorage.getItem("en-naal-pin"))document.documentElement.classList.add("locked")}catch(e){}</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap">
+<style>
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:#EDF2EF;color:#13211D;font-family:"Mukta Malar",system-ui,sans-serif;padding:12px 12px 90px;font-size:15px;line-height:1.45}
+.app{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.card{background:#fff;border:1px solid #D3DDD8;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.top h1{font-size:1.4rem;font-weight:800;margin:0}
+.btn{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid #D3DDD8;background:#fff;font-weight:700;font-family:inherit;cursor:pointer}
+.btn.primary{background:#0E6B5B;color:#fff;border-color:#0E6B5B}
+.btn.small{min-height:34px;font-size:.85rem;padding:0 10px}
+.btn.danger{color:#B42318;border-color:#F3C3BE}
+.field{display:flex;flex-direction:column;gap:4px}.field label{font-size:.8rem;color:#566862;font-weight:600}
+input,select,textarea{width:100%;min-height:44px;padding:8px 12px;border:1px solid #D3DDD8;border-radius:10px;background:#F5F8F6;font-size:15px;font-family:inherit}
+input[type=checkbox]{width:20px;min-height:20px;height:20px}
+.check{display:flex;align-items:center;gap:8px;font-size:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:480px){.grid2{grid-template-columns:1fr}}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{padding:12px;border-radius:12px}.stat small{font-size:.7rem;font-weight:700;opacity:.8;text-transform:uppercase}.stat b{font-family:"IBM Plex Mono",monospace;font-size:1.2rem;display:block}
+.stat.owe{background:#FBEBD3;color:#9A4A06}.stat.get{background:#DDE8FF;color:#1A56DB}.stat.net{background:#0E6B5B;color:#fff}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#EDF2EF;border:1px solid #D3DDD8;border-radius:12px;padding:4px}
+.seg button{min-height:38px;border:0;border-radius:8px;background:none;color:#566862;font-weight:700;font-family:inherit}
+.seg button.on{background:#0E6B5B;color:#fff}
+.person-card{border:1px solid #D3DDD8;border-radius:12px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.person-card.new{border-color:#0E6B5B;box-shadow:0 0 0 3px #D7EDE6;animation:pop .5s}
+.person-card.late{border-color:#E8A59E}
+@keyframes pop{0%{transform:scale(.97)}100%{transform:scale(1)}}
+.row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px dashed #D3DDD8;font-size:.85rem;align-items:center}
+.row:first-child{border-top:0}
+.num{font-family:"IBM Plex Mono",monospace;font-weight:700}
+.progress{height:6px;background:#D7EDE6;border-radius:3px;overflow:hidden}.progress i{display:block;height:100%;background:#0E6B5B}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #D3DDD8;display:flex;justify-content:center;gap:4px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+.tabs button{flex:1;max-width:110px;min-height:46px;border:0;border-radius:10px;background:none;color:#566862;font-weight:700;font-size:.72rem;padding:4px 2px;font-family:inherit}
+.tabs button.on{background:#D7EDE6;color:#0E6B5B}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#13211D;color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;z-index:99;display:none;max-width:90vw;text-align:center}
+.toast.show{display:block}
+.badge{font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:700}
+.badge.owe{background:#FBEBD3;color:#9A4A06}.badge.get{background:#DDE8FF;color:#1A56DB}.badge.done{background:#D7EDE6;color:#0E6B5B}.badge.late{background:#FDE2DF;color:#B42318}
+.reminder-alert{background:#FFF3CD;border:1px solid #FFEEBA;color:#856404;padding:10px;border-radius:8px;font-size:.85rem;font-weight:600}
+.chart-wrap{width:100%;overflow:hidden;background:#F5F8F6;border-radius:10px;padding:8px}.chart-wrap canvas{width:100%;height:220px;display:block}
+.muted{color:#566862;font-size:.85rem}.inline-actions{display:flex;gap:6px;flex-wrap:wrap}
+.goal-bar{height:10px;background:#D7EDE6;border-radius:6px;overflow:hidden}.goal-bar i{display:block;height:100%;background:#0E6B5B}
+.modal{position:fixed;left:12px;right:12px;top:50%;transform:translateY(-50%);z-index:20;max-width:420px;margin:0 auto;box-shadow:0 20px 50px rgba(0,0,0,.3);max-height:90vh;overflow:auto}
+.cat-bar{display:flex;align-items:center;gap:8px;font-size:.8rem}.cat-bar i{display:block;height:8px;background:#0E6B5B;border-radius:4px}
+
+body{padding-bottom:108px}
+.tabs{padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));gap:2px;box-shadow:0 -4px 18px rgba(14,107,91,.12)}
+.tabs button{flex:1;max-width:none;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.78rem;font-weight:700;border-radius:14px;line-height:1.1;padding:4px 2px}
+.tabs button svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.tabs button.on{background:#D7EDE6;color:#0E6B5B}
+.tabs button.on svg{transform:translateY(-1px) scale(1.1);stroke-width:2.4}
+#lock{position:fixed;inset:0;z-index:200;background:linear-gradient(180deg,#06201C,#0E6B5B);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px}
+html.locked #lock,#lock.show{display:flex}
+html.locked .app,html.locked .tabs{visibility:hidden}
+#lock h2{margin:0;font-size:1.3rem}
+.dots{display:flex;gap:14px}.dots i{width:16px;height:16px;border-radius:50%;border:2px solid #fff;display:block}.dots i.on{background:#FFC83D;border-color:#FFC83D}
+.keys{display:grid;grid-template-columns:repeat(3,76px);gap:14px}
+.keys button{width:76px;height:76px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:1.6rem;font-weight:700;font-family:"IBM Plex Mono",monospace}
+.keys button:active{background:rgba(255,255,255,.32)}
+#lockMsg{min-height:1.4em;color:#FFD9A0;font-weight:600;text-align:center}
+.linkbtn{background:none;border:0;color:#BFE8DC;text-decoration:underline;font-family:inherit;font-size:.9rem;min-height:40px;cursor:pointer}
+.thumb{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #D3DDD8;cursor:pointer;background:#EDF2EF}
+.thumb-big{max-width:100%;max-height:60vh;border-radius:10px;display:block;margin:0 auto}
+.backup-banner{background:#DDE8FF;border:1px solid #B8CEFF;color:#1A3F99;padding:10px;border-radius:8px;font-size:.85rem;font-weight:600;display:flex;flex-direction:column;gap:8px}
+.legend{display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.tool-res{background:#F5F8F6;border-radius:10px;padding:10px;font-size:.9rem;line-height:1.7}
+.chart2{width:100%;height:220px;display:block}
+
+.stat .sub{display:block;margin-top:6px;font-size:.78rem;text-transform:none;opacity:.95;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:34px;min-width:38px;padding:0 10px;border-radius:999px;border:1px solid #D3DDD8;background:#fff;font-weight:700;font-family:inherit;font-size:.85rem;cursor:pointer}
+.chip.on{background:#0E6B5B;color:#fff;border-color:#0E6B5B}
+.upi-box{background:#F5F8F6;border:1px solid #D3DDD8;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.upi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.upi-grid .btn{min-height:44px}
+.notice-row{font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div><h1>என் நாள் - கடன்</h1><p id="today" style="color:#566862;font-size:.85rem;margin:0"></p></div><div style="display:flex;gap:6px"><button class="btn small" id="langBtn" type="button">English</button><button class="btn small" id="backupBtn" type="button">காப்பு</button></div></div>
+<div class="card" id="backup" hidden>
+ <textarea id="backupText" style="min-height:80px"></textarea>
+ <div class="inline-actions"><button class="btn small primary" id="copyBtn" type="button">Copy</button><button class="btn small" id="downloadBackupBtn" type="button">JSON காப்புப் பிரதி</button><button class="btn small" id="downloadBackupPhotosBtn" type="button">📷 படங்களுடன் முழுக் காப்பு</button><button class="btn small" id="restoreBtn" type="button">Restore</button><label class="btn small" for="backupFile" style="display:inline-flex;align-items:center">கோப்பிலிருந்து மீட்டெடு</label><input id="backupFile" type="file" accept="application/json,.json" hidden></div>
+ <p class="muted" id="lastBackupInfo" style="margin:0"></p>
+</div>
+<div id="reminderBanner" style="display:none"></div>
+<div id="backupBanner" class="backup-banner" hidden></div>
+
+<div id="tab-home">
+<div class="stat-grid" id="homeStats"></div>
+<div class="card"><h3 style="margin:0">📅 இந்த மாதம்</h3><div id="monthQuick"></div></div>
+<div class="card"><h3 style="margin:0">⏰ விரைவில் வரும் தேதிகள்</h3><div id="upcomingList"></div></div>
+<div class="card"><h3 style="margin:0">மீதமுள்ள கடன் - யார் யாரிடம்</h3><div id="summaryList"></div></div>
+</div>
+
+<div id="tab-debt" hidden>
+<div class="stat-grid" id="debtStats"></div>
+<div class="seg"><button data-debt="owe" class="on" id="btnOwe" type="button">கொடுக்க வேண்டியது</button><button data-debt="get" id="btnGet" type="button">வர வேண்டியது</button></div>
+<div class="card" style="border:2px solid #0E6B5B">
+<h3 style="margin:0;color:#0E6B5B">+ புதிய கடன் சேர்க்க</h3>
+<div class="grid2">
+<div class="field"><label for="person">நபர் பெயர் *</label><input id="person" type="text" placeholder="எ.கா. ரமேஷ்" autocomplete="off" list="peopleList"><datalist id="peopleList"></datalist></div>
+<div class="field"><label for="amount">மொத்தத் தொகை ₹ *</label><input id="amount" type="number" inputmode="decimal" placeholder="5000"></div>
+</div>
+<div class="grid2">
+<div class="field"><label for="typeSel">வகை</label><select id="typeSel"><option value="owe">நான் வாங்கியது (கொடுக்கணும்)</option><option value="get">நான் கொடுத்தது (வரணும்)</option></select></div>
+<div class="field"><label for="date">கடன் கொடுக்க/வர வேண்டிய தேதி *</label><input id="date" type="date"></div>
+</div>
+<div class="field"><label for="note">குறிப்பு</label><input id="note" type="text" placeholder="எ.கா. கைமாத்து"></div>
+<div class="grid2">
+<div class="field"><label for="rate">வட்டி விகிதம் % (விருப்பம்)</label><input id="rate" type="number" step="0.01" min="0" inputmode="decimal" placeholder="எ.கா. 2 அல்லது 9.15"></div>
+<div class="field"><label for="rateUnit">எந்தக் காலத்துக்கு</label><select id="rateUnit"><option value="month">மாதத்துக்கு</option><option value="year">வருடத்துக்கு</option></select></div>
+</div>
+<div class="chips" id="rateChips" aria-label="விரைவு வட்டி விகிதம் 1 முதல் 12"></div>
+<div class="grid2">
+<div class="field"><label for="startDate">கடன் தொடங்கிய தேதி (வட்டிக்கு)</label><input id="startDate" type="date"></div>
+<div class="field"><label for="intDay">வட்டி கட்டும் நாள் (மாதத்தில்)</label><input id="intDay" type="number" min="1" max="31" inputmode="numeric" placeholder="எ.கா. 21"></div>
+</div>
+<button class="btn primary" id="saveDebtBtn" type="button" style="margin-top:4px">✅ சேமி - கடனை சேர்</button>
+<p id="formMsg" style="margin:0;font-size:.85rem;color:#B42318;display:none"></p>
+</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+<input id="searchPerson" type="search" placeholder="நபரை தேடு...">
+<select id="filterPaid" style="max-width:120px"><option value="all">எல்லாம்</option><option value="unpaid">நிலுவை</option><option value="paid">முடிந்தது</option></select>
+</div>
+<div id="personList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+</div>
+
+<div id="tab-trans" hidden>
+<div class="seg"><button data-trans="expense" class="on" type="button">செலவு</button><button data-trans="income" type="button">வரவு</button></div>
+<div class="card">
+<div class="grid2"><div class="field"><label for="tAmount">தொகை</label><input id="tAmount" type="number" inputmode="decimal" placeholder="0"></div><div class="field"><label for="tCat">வகை</label><select id="tCat"></select></div></div>
+<div class="grid2"><div class="field"><label for="tNote">விவரம்</label><input id="tNote" placeholder="விவரம்"></div><div class="field"><label for="tDate">தேதி</label><input id="tDate" type="date"></div></div>
+<div class="field"><label id="timeLabel" for="tTime">நேரம் (AM/PM)</label><input id="tTime" type="time" step="60"></div>
+<div class="field"><label>📷 புகைப்படம் (பில் / ரசீது, விருப்பம்)</label><div class="inline-actions"><label class="btn small" for="tCam">📸 கேமரா</label><label class="btn small" for="tPhoto">🖼 கேலரி</label><button class="btn small danger" id="tPhotoClear" type="button" hidden>✕ நீக்கு</button></div><input id="tCam" type="file" accept="image/*" capture="environment" hidden><input id="tPhoto" type="file" accept="image/*" hidden><div style="display:flex;align-items:center;gap:8px"><img id="tPhotoPrev" class="thumb" hidden alt="தேர்ந்த படம்"><span id="tPhotoName" class="muted"></span></div></div>
+<button class="btn primary" id="saveTransBtn" type="button">சேர்</button>
+</div>
+<div class="card">
+  <h3 style="margin:0">📅 மாதம் / தேதி அடிப்படையில் பார்க்க</h3>
+  <div class="grid2">
+    <div class="field"><label for="monthFilter">மாதத்தைத் தேர்வு செய்க</label><input id="monthFilter" type="month"></div>
+    <div class="field"><label for="dayFilter">குறிப்பிட்ட தேதி (விருப்பம்)</label><input id="dayFilter" type="date"></div>
+  </div>
+  <div class="field"><label for="transSearch">தேடல் (விவரம்/வகை)</label><input id="transSearch" type="search" placeholder="தேடு..."></div>
+  <div class="inline-actions"><button class="btn small" id="clearDateFilter" type="button">தேதி வடிகட்டியை நீக்கு</button><button class="btn small primary" id="dailyPdfBtn" type="button">📄 தினசரி PDF</button><button class="btn small primary" id="monthlyPdfBtn" type="button">📄 மாத PDF</button></div>
+  <p id="monthSummary" style="margin:0;color:#566862;font-size:.9rem"></p>
+  <div id="transList"></div>
+</div>
+</div>
+
+<div id="tab-report" hidden>
+ <div class="card"><h3 style="margin:0">📊 மாதாந்திர அறிக்கை</h3>
+  <div class="field"><label for="reportMonth">அறிக்கை மாதம்</label><input id="reportMonth" type="month"></div>
+  <div id="reportStats" class="stat-grid"></div>
+  <div class="chart-wrap"><canvas id="monthlyChart" width="600" height="260" aria-label="மாத வரவு செலவு வரைபடம்"></canvas></div>
+  <p class="muted" style="margin:0">வரவு, செலவு மற்றும் சேமிப்பு ஒப்பீடு</p>
+<h4 style="margin:6px 0 0">கடந்த 6 மாதப் போக்கு</h4>
+<div class="chart-wrap"><canvas id="trendChart" class="chart2" role="img" aria-label="கடந்த 6 மாத வரவு செலவு வரைபடம்"></canvas></div>
+<p class="muted" style="margin:0">நீலம்: வரவு · ஆரஞ்சு: செலவு · கீழே மீதித் தொகை</p>
+<h4 style="margin:6px 0 0">செலவுப் பிரிவு (வட்ட வரைபடம்)</h4>
+<div class="chart-wrap"><canvas id="donutChart" class="chart2" role="img" aria-label="வகை வாரியாகச் செலவு வட்ட வரைபடம்"></canvas></div>
+<div id="donutLegend" class="legend"></div>
+  <h4 style="margin:6px 0 0">வகை வாரியாக செலவு</h4><div id="catBreakdown"></div>
+  <div class="inline-actions"><button class="btn small primary" id="exportIncomeCsv" type="button">வரவு CSV</button><button class="btn small primary" id="exportExpenseCsv" type="button">செலவு CSV</button><button class="btn small primary" id="exportDebtCsv" type="button">கடன் CSV</button><button class="btn small" id="exportHistoryCsv" type="button">கடன் வரலாறு CSV</button></div>
+ </div>
+ <div class="card"><h3 style="margin:0">📜 முழுக் கடன் வரலாறு</h3><p class="muted" style="margin:0">கடன் சேர்த்தல் மற்றும் ஒவ்வொரு செலுத்தல்/வசூல் பதிவும் இங்கே காட்டப்படும்.</p><div id="debtHistoryList"></div></div>
+</div>
+
+<div id="tab-goals" hidden>
+ <div class="card"><h3 style="margin:0">💼 சம்பளம் மற்றும் சேமிப்பு இலக்குகள்</h3>
+  <div class="field"><label for="salaryAmount">மாத சம்பளம் (₹)</label><input id="salaryAmount" type="number" min="0" placeholder="உதா. 25000"></div>
+  <div class="grid2"><div class="field"><label for="salaryDay">சம்பளம் வரும் தேதி (மாதத்தில்)</label><input id="salaryDay" type="number" min="1" max="31" placeholder="5"></div><div class="field"><label for="savingTarget">மாத சேமிப்பு இலக்கு (₹)</label><input id="savingTarget" type="number" min="0" placeholder="உதா. 5000"></div></div>
+  <div class="grid2"><div class="field"><label for="goalName">சேமிப்பு இலக்கின் பெயர்</label><input id="goalName" placeholder="உதா. அவசர நிதி"></div><div class="field"><label for="goalAmount">மொத்த இலக்கு தொகை (₹)</label><input id="goalAmount" type="number" min="0" placeholder="உதா. 50000"></div></div>
+  <div class="field"><label for="goalSaved">இதுவரை சேமித்த தொகை (₹)</label><input id="goalSaved" type="number" min="0" placeholder="உதா. 10000"></div>
+  <div class="inline-actions"><button class="btn primary" id="saveGoalsBtn" type="button">இலக்குகளைச் சேமி</button><button class="btn" id="recordSalaryBtn" type="button">இந்த மாத சம்பளத்தை வரவாக பதிவு செய்</button></div>
+  <div id="goalSummary"></div>
+ </div>
+ <div class="card"><h3 style="margin:0">🧮 வட்டி / EMI கணக்கீடு</h3>
+<h4 style="margin:0">EMI (வங்கிக் கடன்)</h4>
+<div class="grid2"><div class="field"><label for="emiP">கடன் தொகை ₹</label><input id="emiP" type="number" inputmode="decimal" placeholder="100000"></div><div class="field"><label for="emiR">வட்டி % (ஆண்டுக்கு)</label><input id="emiR" type="number" step="0.01" inputmode="decimal" placeholder="10.5"></div></div>
+<div class="field"><label for="emiN">மாதங்கள்</label><input id="emiN" type="number" inputmode="numeric" placeholder="24"></div>
+<button class="btn primary" id="emiBtn" type="button">EMI கணக்கிடு</button><div id="emiRes" class="tool-res" hidden></div>
+<h4 style="margin:8px 0 0">கைவட்டி (மாதத்துக்கு %)</h4>
+<div class="grid2"><div class="field"><label for="siP">முதல் தொகை ₹</label><input id="siP" type="number" inputmode="decimal" placeholder="10000"></div><div class="field"><label for="siR">வட்டி % (மாதத்துக்கு)</label><input id="siR" type="number" step="0.01" inputmode="decimal" placeholder="2"></div></div>
+<div class="field"><label for="siN">மாதங்கள்</label><input id="siN" type="number" step="0.1" inputmode="decimal" placeholder="6"></div>
+<button class="btn primary" id="siBtn" type="button">வட்டி கணக்கிடு</button><div id="siRes" class="tool-res" hidden></div>
+</div>
+<div class="card"><h3 style="margin:0">🔒 PIN பூட்டு</h3><p class="muted" style="margin:0" id="pinStatus"></p>
+<div class="inline-actions"><button class="btn primary" id="pinSetBtn" type="button">PIN அமை</button><button class="btn" id="pinChangeBtn" type="button" hidden>PIN மாற்று</button><button class="btn danger" id="pinRemoveBtn" type="button" hidden>PIN நீக்கு</button></div></div>
+<div class="card"><h3 style="margin:0">💾 காப்புப் பிரதி நினைவூட்டல்</h3>
+<div class="field"><label for="backupDays">எத்தனை நாளுக்கு ஒருமுறை நினைவூட்டவா?</label><select id="backupDays"><option value="3">3 நாள்</option><option value="7">7 நாள்</option><option value="14">14 நாள்</option><option value="30">30 நாள்</option><option value="0">வேண்டாம்</option></select></div>
+<p class="muted" id="backupGoalInfo" style="margin:0"></p></div>
+<div class="card"><h3 style="margin:0">🔔 நினைவூட்டல் அமைப்புகள்</h3><p class="muted" style="margin:0">காலக்கெடு நினைவூட்டல்கள் செயலியைத் திறந்திருக்கும்போது தானாகச் சரிபார்க்கப்படும். அறிவிப்புகளை அனுமதித்தால் உலாவி அறிவிப்பும் வரும்.</p><button class="btn" id="enableNotificationsBtn" type="button">உலாவி அறிவிப்புகளை இயக்கு</button><p id="notificationStatus" class="muted" style="margin:0"></p></div>
+</div>
+</div>
+
+<nav class="tabs">
+<button data-tab="home" class="on" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>முகப்பு</span></button>
+<button data-tab="debt" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg><span>கடன்</span></button>
+<button data-tab="trans" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h13v2"/><rect x="3" y="8" width="18" height="12" rx="2"/><circle cx="16.5" cy="14" r="1.3"/></svg><span>வரவு-செலவு</span></button>
+<button data-tab="report" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11M11 20V4M17 20v-7M2 20h20"/></svg><span>அறிக்கை</span></button>
+<button data-tab="goals" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg><span>இலக்குகள்</span></button>
+</nav>
+
+<!-- Pay modal -->
+<div id="payModal" class="card modal" hidden role="dialog" aria-modal="true" aria-labelledby="payTitle">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 id="payTitle" style="margin:0">பணம் செலுத்து</h3><button class="btn small" id="payClose" type="button" aria-label="மூடு">✕ மூடு</button></div>
+<p id="payInfo" class="muted" style="margin:0"></p>
+<div class="field"><label for="payAmount">தொகை</label><input id="payAmount" type="number" inputmode="decimal" placeholder="0"></div>
+<button class="btn small" id="payFull" type="button">முழு மீதத் தொகை</button>
+<div class="field"><label for="payDate">தேதி</label><input id="payDate" type="date"></div>
+<label class="check"><input type="checkbox" id="payLink" checked> <span id="payLinkText">வரவு-செலவிலும் தானாகப் பதிவு செய்</span></label>
+<div id="upiBox" class="upi-box" hidden>
+<div style="font-weight:700">📲 செலுத்தும் ஆப்பைத் தேர்ந்தெடுங்கள்</div>
+<div class="upi-grid">
+<button class="btn small" data-upi="gpay" type="button">Google Pay</button>
+<button class="btn small" data-upi="phonepe" type="button">PhonePe</button>
+<button class="btn small" data-upi="paytm" type="button">Paytm</button>
+<button class="btn small" data-upi="bhim" type="button">BHIM</button>
+<button class="btn small" data-upi="amazon" type="button">Amazon Pay</button>
+<button class="btn small" data-upi="any" type="button">மற்ற UPI ஆப்கள்</button>
+</div>
+<div class="field"><label for="payUpi">பெறுபவர் UPI ID (தெரிந்தால் மட்டும்)</label><input id="payUpi" type="text" autocapitalize="none" autocomplete="off" placeholder="name@bank"></div>
+<p class="muted" id="upiHint" style="margin:0">UPI ID எழுதினால் தொகையுடன் நேரடியாகப் பணம் செலுத்தும் திரை திறக்கும். எழுதாவிட்டால் Google Pay / PhonePe / Paytm ஆப் மட்டும் திறக்கும்; தொகை நகலெடுக்கப்படும்.</p>
+<a id="upiGo" hidden rel="noopener">upi</a>
+</div>
+<div style="display:flex;gap:8px"><button class="btn primary" id="paySave" type="button">சேமி</button><button class="btn" id="payCancel" type="button">ரத்து</button></div>
+</div>
+
+<!-- Edit modal -->
+<div id="editModal" class="card modal" hidden role="dialog" aria-modal="true" aria-labelledby="editTitle">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><h3 id="editTitle" style="margin:0">திருத்து</h3><button class="btn small" id="editClose" type="button" aria-label="மூடு">✕ மூடு</button></div>
+<div class="field" id="eNameWrap"><label for="eName">நபர் பெயர்</label><input id="eName" type="text"></div>
+<div class="field"><label for="eAmount" id="eAmountLabel">தொகை</label><input id="eAmount" type="number" inputmode="decimal"></div>
+<div class="field"><label for="eDate">தேதி</label><input id="eDate" type="date"></div>
+<div class="field" id="eTimeWrap"><label for="eTime">நேரம்</label><input id="eTime" type="time"></div>
+<div class="field"><label for="eNote">குறிப்பு / விவரம்</label><input id="eNote" type="text"></div>
+<div id="eRateWrap" style="display:flex;flex-direction:column;gap:10px">
+<div class="grid2">
+<div class="field"><label for="eRate">வட்டி விகிதம் %</label><input id="eRate" type="number" step="0.01" min="0" inputmode="decimal"></div>
+<div class="field"><label for="eRateUnit">எந்தக் காலத்துக்கு</label><select id="eRateUnit"><option value="month">மாதத்துக்கு</option><option value="year">வருடத்துக்கு</option></select></div>
+</div>
+<div class="chips" id="eRateChips"></div>
+<div class="grid2">
+<div class="field"><label for="eStart">கடன் தொடங்கிய தேதி</label><input id="eStart" type="date"></div>
+<div class="field"><label for="eIntDay">வட்டி கட்டும் நாள்</label><input id="eIntDay" type="number" min="1" max="31" inputmode="numeric"></div>
+</div>
+</div>
+<div class="field" id="ePhotoWrap"><label for="eFile">📷 புகைப்படம்</label><img id="ePhotoPrev" class="thumb" hidden alt="தற்போதைய படம்"><input id="eFile" type="file" accept="image/*"><label class="check"><input type="checkbox" id="ePhotoDel"> <span>படத்தை நீக்கு</span></label></div>
+<p id="editMsg" style="margin:0;font-size:.85rem;color:#B42318;display:none"></p>
+<div style="display:flex;gap:8px"><button class="btn primary" id="editSave" type="button">சேமி</button><button class="btn" id="editCancel" type="button">ரத்து</button></div>
+</div>
+
+<div id="photoModal" class="card modal" hidden role="dialog" aria-modal="true" aria-labelledby="photoTitle"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 id="photoTitle" style="margin:0">📷 புகைப்படம்</h3><button class="btn small" id="photoClose" type="button">✕ மூடு</button></div><img id="photoBig" class="thumb-big" alt="புகைப்படம்"></div>
+<div id="lock" role="dialog" aria-modal="true" aria-labelledby="lockTitle"><h2 id="lockTitle">PIN உள்ளிடுக</h2><div class="dots" id="lockDots"><i></i><i></i><i></i><i></i></div><div id="lockMsg" role="status"></div><div class="keys" id="lockKeys"></div><button class="linkbtn" id="lockForgot" type="button">PIN மறந்துவிட்டதா?</button><button class="linkbtn" id="lockCancel" type="button" hidden>ரத்து</button></div>
+<div id="overlay" hidden style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='en-naal-v5-reminders';
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const nowTime=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());};
+const uid=()=>Math.random().toString(36).slice(2,7)+Date.now().toString(36);
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const escapeHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function initial(name){
+  try{ if(window.Intl&&Intl.Segmenter){ const s=[...new Intl.Segmenter('ta',{granularity:'grapheme'}).segment(name)].map(x=>x.segment); return s.slice(0,2).join('').toUpperCase(); } }catch(e){}
+  return Array.from(name).slice(0,2).join('').toUpperCase();
+}
+let language='ta';
+const englishMap={
+'என் நாள் - கடன்':'My Day - Debts','காப்பு':'Backup','முகப்பு':'Home','கடன்':'Debts','வரவு-செலவு':'Income / Expense','அறிக்கை':'Report','இலக்குகள்':'Goals',
+'கொடுக்க வேண்டியது':'I Owe','வர வேண்டியது':'Owed to Me','+ புதிய கடன் சேர்க்க':'+ Add New Debt',
+'நபர் பெயர் *':'Person name *','மொத்தத் தொகை ₹ *':'Amount ₹ *','கடன் கொடுக்க/வர வேண்டிய தேதி *':'Due Date *',
+'குறிப்பு':'Note','✅ சேமி - கடனை சேர்':'✅ Save Debt','எல்லாம்':'All','நிலுவை':'Pending','முடிந்தது':'Completed',
+'செலவு':'Expense','வரவு':'Income','சேர்':'Add','திருத்து':'Edit','நீக்கு':'Delete','ரத்து':'Cancel','சேமி':'Save',
+'மாதத்தைத் தேர்வு செய்க':'Choose month','குறிப்பிட்ட தேதி (விருப்பம்)':'Specific date (optional)',
+'தேதி வடிகட்டியை நீக்கு':'Clear date filter','📄 தினசரி PDF':'📄 Daily PDF','📄 மாத PDF':'📄 Monthly PDF','✕ மூடு':'✕ Close',
+'📅 இந்த மாதம்':'📅 This month','⏰ விரைவில் வரும் தேதிகள்':'⏰ Upcoming due dates','மீதமுள்ள கடன் - யார் யாரிடம்':'Outstanding - who & how much',
+'🎯':'🎯'
+};
+function applyLanguage(){
+ const en=language==='en';
+ document.documentElement.lang=en?'en':'ta';
+ const reverse=Object.fromEntries(Object.entries(englishMap).map(([a,b])=>[b,a]));
+ const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let node;
+ while(node=walker.nextNode()){
+   const t=node.nodeValue.trim();if(!t)continue;
+   const map=en?englishMap:reverse;
+   if(map[t])node.nodeValue=node.nodeValue.replace(t,map[t]);
+ }
+ $('#langBtn').textContent=en?'தமிழ்':'English';
+ $('#searchPerson').placeholder=en?'Search person...':'நபரை தேடு...';
+ $('#person').placeholder=en?'e.g. Ramesh':'எ.கா. ரமேஷ்';
+ $('#note').placeholder=en?'e.g. Personal loan':'எ.கா. கைமாத்து';
+ $('#tNote').placeholder=en?'Description':'விவரம்';
+ $('#transSearch').placeholder=en?'Search...':'தேடு...';
+ $('#filterPaid').options[0].text=en?'All':'எல்லாம்';
+ $('#filterPaid').options[1].text=en?'Pending':'நிலுவை';
+ $('#filterPaid').options[2].text=en?'Completed':'முடிந்தது';
+ $('#timeLabel').textContent=en?'Time (AM/PM)':'நேரம் (AM/PM)';
+ $('#payLinkText').textContent=en?'Also record in income/expense':'வரவு-செலவிலும் தானாகப் பதிவு செய்';
+ $('#payFull').textContent=en?'Full remaining amount':'முழு மீதத் தொகை';
+ renderAll();
+}
+
+/* ---------- State ---------- */
+const defaultGoals={salary:0,salaryDay:5,savingTarget:0,goalName:'',goalAmount:0,goalSaved:0};
+function normalize(s){
+  s=s&&typeof s==='object'?s:{};
+  const debts=(Array.isArray(s.debts)?s.debts:[]).map(d=>{
+    const o=Number(d.original||d.amount||0);
+    const payments=(Array.isArray(d.payments)?d.payments:[]).map(p=>({...p,id:p.id||uid(),amount:Number(p.amount||0)}));
+    const nd={...d,id:d.id||uid(),original:o,amount:o,paidAmount:Number(d.paidAmount||0),payments,
+      history:Array.isArray(d.history)?d.history:[],type:d.type==='get'?'get':'owe',
+      person:String(d.person||'பெயரிடப்படாதவர்'),date:d.date||'',note:d.note||'',rate:Math.max(0,Number(d.rate)||0),rateUnit:d.rateUnit==='year'?'year':'month',start:d.start||'',intDay:Math.min(31,Math.max(0,parseInt(d.intDay,10)||0)),upiId:String(d.upiId||'')};
+    delete nd._new;return nd;
+  });
+  return {debts,
+    expenses:Array.isArray(s.expenses)?s.expenses.map(e=>({...e,id:e.id||uid()})):[],
+    incomes:Array.isArray(s.incomes)?s.incomes.map(e=>({...e,id:e.id||uid()})):[],
+    goals:{...defaultGoals,...(s.goals&&typeof s.goals==='object'?s.goals:{})}};
+}
+function load(){
+  try{
+    const r=localStorage.getItem(KEY);if(r)return normalize(JSON.parse(r));
+    const old=localStorage.getItem('en-naal-v4-final');if(old)return normalize(JSON.parse(old));
+  }catch(e){}
+  return normalize({});
+}
+let state=load();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));return true;}catch(e){toast('சேமிக்க முடியவில்லை. இடம் நிரம்பியிருக்கலாம் - காப்புப் பிரதி எடுக்கவும்.');return false;}};
+let debtFilter='owe',transType='expense',payTarget=null,newDebtId=null,editTarget=null,pendingPhoto=null,editNewPhoto=null,bigURL=null;
+const thumbURLs=[];let payUpiUsed=null;
+const calc=d=>({remain:Math.max(0,Math.round((d.original-(d.paidAmount||0))*100)/100),paid:d.paidAmount||0});
+let toastTimer;
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
+function daysUntil(dateStr){
+  if(!dateStr)return null;
+  const t=new Date(key(new Date())+'T00:00:00'),d=new Date(dateStr+'T00:00:00');
+  if(isNaN(d))return null;return Math.round((d-t)/86400000);
+}
+
+/* ---------- Interest ---------- */
+const monthlyRate=d=>d.rateUnit==='year'?d.rate/12:d.rate;
+const validUpi=v=>/^[A-Za-z0-9._-]{2,256}@[A-Za-z][A-Za-z0-9.-]{1,64}$/.test(v);
+function interestInfo(d){
+  const c=calc(d);if(!(d.rate>0)||c.remain<=0)return null;
+  const overdue=d.date&&daysUntil(d.date)!==null&&daysUntil(d.date)<0;
+  const from=d.start||(overdue?d.date:'');if(!from)return null;
+  const dd=daysUntil(from);if(dd===null)return null;const days=-dd;if(!(days>0))return null;
+  const months=days/30,interest=Math.round(c.remain*monthlyRate(d)/100*months*100)/100;
+  return {months,interest,total:Math.round((c.remain+interest)*100)/100};
+}
+function nextIntDate(d){
+  const day=Number(d.intDay)||0;if(!day)return null;
+  const t=new Date(key(new Date())+'T00:00:00');
+  for(let k=0;k<3;k++){
+    const last=new Date(t.getFullYear(),t.getMonth()+k+1,0).getDate();
+    const cand=new Date(t.getFullYear(),t.getMonth()+k,Math.min(day,last));
+    if(cand>=t)return key(cand);
+  }
+  return null;
+}
+function dayWord(n){
+  if(n<0)return `<b style="color:#B42318">${-n} நாள் தாமதம்</b>`;
+  if(n===0)return `<b style="color:#B42318">இன்று!</b>`;
+  return `இன்னும் <b style="color:${n<=3?'#B42318':'#0E6B5B'}">${n} நாள்</b>`;
+}
+function dateNotices(d){
+  if(calc(d).remain<=0)return '';
+  const rows=[],ni=nextIntDate(d);
+  if(ni)rows.push(`<div class="row notice-row"><span>🗓 அடுத்த வட்டித் தேதி: <b>${ni}</b></span><span>${dayWord(daysUntil(ni))}</span></div>`);
+  if(d.date){const n=daysUntil(d.date);if(n!==null)rows.push(`<div class="row notice-row"><span>⏳ ${d.type==='owe'?'கொடுக்க வேண்டிய':'வர வேண்டிய'} கடைசி தேதி: <b>${escapeHtml(d.date)}</b></span><span>${dayWord(n)}</span></div>`);}
+  return rows.join('');
+}
+const APPN={gpay:'Google Pay',phonepe:'PhonePe',paytm:'Paytm',bhim:'BHIM',amazon:'Amazon Pay',any:'UPI'};
+const APP_PKG={bhim:'in.org.npci.upiapp',amazon:'in.amazon.mShop.android.shopping'};
+function upiUrl(app,vpa,name,amount){
+  const ascii=s=>/^[\x20-\x7E]*$/.test(s)&&s.trim()?s.trim():'Payee';
+  const q='pa='+encodeURIComponent(vpa)+'&pn='+encodeURIComponent(ascii(name))+'&am='+amount.toFixed(2)+'&cu=INR&tn='+encodeURIComponent('Loan repayment');
+  if(APP_PKG[app])return 'intent://pay?'+q+'#Intent;scheme=upi;package='+APP_PKG[app]+';end';
+  const base={gpay:'tez://upi/pay?',phonepe:'phonepe://pay?',paytm:'paytmmp://pay?',any:'upi://pay?'}[app]||'upi://pay?';
+  return base+q;
+}
+const appOpenUrl=app=>({gpay:'tez://',phonepe:'phonepe://',paytm:'paytmmp://'}[app]||'');
+function buildChips(box,input,unitSel){
+  box.innerHTML='';
+  for(let i=1;i<=12;i++){
+    const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=i;b.setAttribute('aria-label','வட்டி '+i+' சதவீதம்');
+    b.addEventListener('click',()=>{input.value=i;sync();});box.appendChild(b);
+  }
+  const sync=()=>[...box.children].forEach(c=>c.classList.toggle('on',Number(c.textContent)===Number(input.value)));
+  input.addEventListener('input',sync);sync();box.sync=sync;
+}
+
+/* ---------- Photos (IndexedDB) ---------- */
+let dbPromise=null;
+function photoDB(){
+  if(dbPromise)return dbPromise;
+  dbPromise=new Promise((res,rej)=>{
+    if(!window.indexedDB){rej(new Error('no idb'));return;}
+    const rq=indexedDB.open('en-naal-photos',1);
+    rq.onupgradeneeded=()=>rq.result.createObjectStore('photos');
+    rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);
+  });
+  dbPromise.catch(()=>{dbPromise=null;});
+  return dbPromise;
+}
+function idbDo(mode,fn){
+  return photoDB().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction('photos',mode),rq=fn(tx.objectStore('photos'));
+    tx.oncomplete=()=>res(rq&&rq.result);tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error);
+  }));
+}
+const putPhoto=(id,blob)=>idbDo('readwrite',s=>s.put(blob,id));
+const getPhoto=id=>idbDo('readonly',s=>s.get(id));
+const delPhoto=id=>idbDo('readwrite',s=>s.delete(id)).catch(()=>{});
+const allPhotoKeys=()=>idbDo('readonly',s=>s.getAllKeys());
+function compressImage(file,max=1280,q=0.72){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{
+      const sc=Math.min(1,max/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*sc)),h=Math.max(1,Math.round(img.height*sc));
+      const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=>b?res(b):rej(new Error('blob')),'image/jpeg',q);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('img'));};
+    img.src=url;
+  });
+}
+const blobToDataURL=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(b);});
+const dataURLToBlob=u=>fetch(u).then(r=>r.blob());
+function loadThumb(im,id){
+  getPhoto(id).then(b=>{if(b){const u=URL.createObjectURL(b);thumbURLs.push(u);im.src=u;}else im.style.visibility='hidden';}).catch(()=>{im.style.visibility='hidden';});
+}
+async function showPhoto(id){
+  try{
+    const b=await getPhoto(id);if(!b){toast('படம் கிடைக்கவில்லை');return;}
+    if(bigURL)URL.revokeObjectURL(bigURL);
+    bigURL=URL.createObjectURL(b);$('#photoBig').src=bigURL;showModal('photoModal');
+  }catch(e){toast('படத்தைத் திறக்க முடியவில்லை');}
+}
+function clearPendingPhoto(){
+  pendingPhoto=null;const pv=$('#tPhotoPrev');
+  if(pv.dataset.u){URL.revokeObjectURL(pv.dataset.u);delete pv.dataset.u;}
+  pv.hidden=true;pv.removeAttribute('src');$('#tPhotoName').textContent='';$('#tPhotoClear').hidden=true;
+}
+async function pickPhoto(file,forEdit){
+  try{
+    const blob=await compressImage(file);
+    if(forEdit){
+      editNewPhoto=blob;const pv=$('#ePhotoPrev');if(pv.dataset.u)URL.revokeObjectURL(pv.dataset.u);
+      pv.dataset.u=URL.createObjectURL(blob);pv.src=pv.dataset.u;pv.hidden=false;$('#ePhotoDel').checked=false;
+    }else{
+      pendingPhoto=blob;const pv=$('#tPhotoPrev');if(pv.dataset.u)URL.revokeObjectURL(pv.dataset.u);
+      pv.dataset.u=URL.createObjectURL(blob);pv.src=pv.dataset.u;pv.hidden=false;
+      $('#tPhotoName').textContent=Math.round(blob.size/1024)+' KB';$('#tPhotoClear').hidden=false;
+    }
+  }catch(e){toast('படத்தைச் சேர்க்க முடியவில்லை');}
+}
+
+/* ---------- PIN lock ---------- */
+const PIN_KEY='en-naal-pin';
+let lockMode='unlock',lockBuf='',lockFirst='',lockFails=0,lockUntil=0,hiddenAt=0,lockAfter=null;
+const hasPin=()=>{try{return !!localStorage.getItem(PIN_KEY);}catch(e){return false;}};
+const canHash=()=>!!(window.crypto&&crypto.subtle&&window.TextEncoder);
+async function hashPin(pin,salt){
+  const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));
+  return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+async function setPin(pin){const salt=uid();localStorage.setItem(PIN_KEY,JSON.stringify({salt,hash:await hashPin(pin,salt)}));}
+async function checkPin(pin){
+  try{const o=JSON.parse(localStorage.getItem(PIN_KEY)||'null');if(!o)return true;return (await hashPin(pin,o.salt))===o.hash;}catch(e){return false;}
+}
+function lockUI(){
+  $('#lockTitle').textContent={unlock:'PIN உள்ளிடுக',set1:'புதிய 4 இலக்க PIN',set2:'PIN-ஐ மீண்டும் உள்ளிடுக',verify:'தற்போதைய PIN உள்ளிடுக'}[lockMode];
+  [...$('#lockDots').children].forEach((d,i)=>d.classList.toggle('on',i<lockBuf.length));
+  $('#lockForgot').hidden=lockMode!=='unlock';$('#lockCancel').hidden=lockMode==='unlock';
+}
+function openLock(mode){lockMode=mode;lockBuf='';lockFirst='';$('#lockMsg').textContent='';$('#lock').classList.add('show');lockUI();}
+function closeLock(){document.documentElement.classList.remove('locked');$('#lock').classList.remove('show');lockBuf='';}
+async function lockSubmit(){
+  const pin=lockBuf;lockBuf='';lockUI();const msg=$('#lockMsg');
+  if(lockMode==='unlock'||lockMode==='verify'){
+    if(Date.now()<lockUntil){msg.textContent='சற்று காத்திருக்கவும் ('+Math.ceil((lockUntil-Date.now())/1000)+' விநாடி)';return;}
+    if(await checkPin(pin)){
+      lockFails=0;msg.textContent='';
+      if(lockMode==='unlock')closeLock();else{const f=lockAfter;lockAfter=null;if(f)f();}
+    }else{
+      lockFails++;msg.textContent='தவறான PIN';
+      if(lockFails>=5){lockUntil=Date.now()+30000;lockFails=0;msg.textContent='5 முறை தவறு - 30 விநாடி காத்திருக்கவும்';}
+    }
+  }else if(lockMode==='set1'){lockFirst=pin;lockMode='set2';msg.textContent='';lockUI();}
+  else if(lockMode==='set2'){
+    if(pin===lockFirst){await setPin(pin);closeLock();renderPinStatus();toast('PIN அமைக்கப்பட்டது ✅');}
+    else{msg.textContent='PIN பொருந்தவில்லை, மீண்டும் முயலவும்';lockMode='set1';lockFirst='';lockUI();}
+  }
+}
+function lockKey(x){
+  if(!$('#lock').classList.contains('show')&&!document.documentElement.classList.contains('locked'))return;
+  if(x==='⌫')lockBuf=lockBuf.slice(0,-1);else if(lockBuf.length<4)lockBuf+=x;
+  lockUI();if(lockBuf.length===4)lockSubmit();
+}
+function renderPinStatus(){
+  const on=hasPin();
+  $('#pinStatus').textContent=on?'PIN பூட்டு இயங்குகிறது. ஆப்பைத் திறக்கும்போதும், 1 நிமிடத்துக்கு மேல் மூடியிருந்தால் மீண்டும் திறக்கும்போதும் PIN கேட்கும்.':'PIN பூட்டு இல்லை. ஆப்பைத் திறப்பவர் யாரும் உங்கள் கணக்கைப் பார்க்கலாம்.';
+  $('#pinSetBtn').hidden=on;$('#pinChangeBtn').hidden=!on;$('#pinRemoveBtn').hidden=!on;
+}
+
+/* ---------- Backup reminder ---------- */
+const BK_KEY='en-naal-last-backup',SN_KEY='en-naal-backup-snooze',DAYS_KEY='en-naal-backup-days';
+const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
+const backupDays=()=>{const v=lsGet(DAYS_KEY);return v===null?7:Number(v);};
+function checkBackupBanner(){
+  const el=$('#backupBanner'),days=backupDays();
+  const has=state.debts.length+state.incomes.length+state.expenses.length>0;
+  if(!days||!has){el.hidden=true;return;}
+  const today=key(new Date()),last=lsGet(BK_KEY),sn=lsGet(SN_KEY);
+  if(sn&&sn>today){el.hidden=true;return;}
+  const since=last?Math.round((new Date(today+'T00:00:00')-new Date(last+'T00:00:00'))/86400000):null;
+  if(last&&since<days){el.hidden=true;return;}
+  el.hidden=false;
+  el.innerHTML='<div>💾 '+(last?'கடைசி காப்புப் பிரதி '+since+' நாள் முன்பு.':'இன்னும் காப்புப் பிரதி எடுக்கவில்லை.')+' தரவு இந்த மொபைலில் மட்டுமே உள்ளது.</div><div class="inline-actions"><button class="btn small primary" id="bkNow" type="button">இப்போது எடுக்கவும்</button><button class="btn small" id="bkLater" type="button">நாளை நினைவூட்டு</button></div>';
+  $('#bkNow').addEventListener('click',()=>downloadBackup(false));
+  $('#bkLater').addEventListener('click',()=>{const t=new Date();t.setDate(t.getDate()+1);lsSet(SN_KEY,key(t));checkBackupBanner();});
+}
+function syncBackupUI(){
+  const sel=$('#backupDays');if(document.activeElement!==sel)sel.value=String(backupDays());
+  const last=lsGet(BK_KEY);$('#backupGoalInfo').textContent=last?'கடைசி JSON காப்பு: '+last:'இன்னும் JSON காப்புப் பிரதி எடுக்கவில்லை.';
+}
+
+/* ---------- Charts (extra) ---------- */
+const PAL=['#0E6B5B','#1A56DB','#C05B17','#7C3AED','#B8860B','#DB2777','#0891B2','#64748B'];
+function setupCanvas(cv){
+  const dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);return {c,w,h};
+}
+function shortMonth(m){const p=m.split('-').map(Number);return new Date(p[0],p[1]-1,1).toLocaleDateString(language==='en'?'en-IN':'ta-IN',{month:'short'});}
+const fmtK=n=>{const a=Math.abs(n);return (n<0?'-':'+')+(a>=1000?(Math.round(a/100)/10)+'k':Math.round(a));};
+function drawTrend(){
+  const cv=$('#trendChart');if(!cv||!cv.clientWidth)return;
+  const base=$('#reportMonth').value||monthKeyNow(),by=+base.slice(0,4),bm=+base.slice(5,7),months=[];
+  for(let i=5;i>=0;i--){const d=new Date(by,bm-1-i,1);months.push(d.getFullYear()+'-'+pad(d.getMonth()+1));}
+  const data=months.map(m=>monthTotals(m)),S=setupCanvas(cv),c=S.c,w=S.w,h=S.h;
+  const max=Math.max(1,...data.map(d=>Math.max(d.income,d.expense))),top=18,bot=h-34,left=8,gw=(w-left*2)/6,bw=Math.min(24,gw/2-4);
+  c.textAlign='center';c.strokeStyle='#D3DDD8';c.lineWidth=1;c.beginPath();c.moveTo(left,bot+.5);c.lineTo(w-left,bot+.5);c.stroke();
+  data.forEach((d,i)=>{
+    const x=left+gw*i+gw/2,hi=(d.income/max)*(bot-top),he=(d.expense/max)*(bot-top);
+    c.fillStyle='#1A56DB';c.fillRect(x-bw-1,bot-hi,bw,hi);
+    c.fillStyle='#C05B17';c.fillRect(x+1,bot-he,bw,he);
+    c.fillStyle='#566862';c.font='12px sans-serif';c.fillText(shortMonth(months[i]),x,h-17);
+    const net=d.income-d.expense;c.fillStyle=net>=0?'#0E6B5B':'#B42318';c.font='bold 11px sans-serif';c.fillText(fmtK(net),x,h-3);
+  });
+}
+function drawDonut(){
+  const cv=$('#donutChart');if(!cv||!cv.clientWidth)return;
+  const month=$('#reportMonth').value||monthKeyNow(),cats={};
+  state.expenses.filter(e=>String(e.date||'').startsWith(month)).forEach(e=>{const k=e.cat||'மற்றவை';cats[k]=(cats[k]||0)+Number(e.amount||0);});
+  const ent=Object.entries(cats).sort((a,b)=>b[1]-a[1]),tot=ent.reduce((s,x)=>s+x[1],0),S=setupCanvas(cv),c=S.c,w=S.w,h=S.h,lg=$('#donutLegend');
+  if(!tot){c.fillStyle='#566862';c.font='14px sans-serif';c.textAlign='center';c.fillText(language==='en'?'No expenses this month':'இந்த மாதம் செலவு இல்லை',w/2,h/2);lg.innerHTML='';return;}
+  const cx=w/2,cy=h/2,R=Math.min(w,h)/2-8,r=R*0.6;let a=-Math.PI/2;
+  ent.forEach((e,i)=>{
+    const sw=e[1]/tot*Math.PI*2;c.beginPath();c.arc(cx,cy,R,a,a+sw);c.arc(cx,cy,r,a+sw,a,true);c.closePath();
+    c.fillStyle=PAL[i%PAL.length];c.fill();c.strokeStyle='#fff';c.lineWidth=2;c.stroke();a+=sw;
+  });
+  c.fillStyle='#13211D';c.textAlign='center';c.font='bold 15px "IBM Plex Mono",monospace';c.fillText(money(tot),cx,cy+5);
+  lg.innerHTML=ent.map((e,i)=>'<div><span class="sw" style="background:'+PAL[i%PAL.length]+'"></span>'+escapeHtml(e[0])+' — <b>'+(e[1]/tot*100).toFixed(0)+'%</b> · '+money(e[1])+'</div>').join('');
+}
+
+/* ---------- Reminders ---------- */
+function checkReminders(){
+  const banner=$('#reminderBanner'),todayStr=key(new Date()),alerts=[];
+  // clean old notification flags
+  try{Object.keys(localStorage).filter(k=>k.startsWith('en-naal-notified-')&&!k.endsWith(todayStr)).forEach(k=>localStorage.removeItem(k));}catch(e){}
+  state.debts.forEach(d=>{
+    const c=calc(d);if(c.remain<=0||!d.date)return;
+    const diff=daysUntil(d.date);if(diff===null)return;
+    let msg='';
+    if(diff<0)msg=`⚠️ <b>${escapeHtml(d.person)}</b> - காலக்கெடு கடந்துவிட்டது (${escapeHtml(d.date)})! மீதி: ${money(c.remain)}`;
+    else if(diff===0)msg=`🔔 <b>இன்று கடைசி தேதி!</b> ${escapeHtml(d.person)} (${d.type==='owe'?'கொடுக்க வேண்டியது':'வர வேண்டியது'}): ${money(c.remain)}`;
+    else if(diff<=2)msg=`⏰ <b>நினைவூட்டல்:</b> ${escapeHtml(d.person)} - இன்னும் ${diff} நாட்களில் (${escapeHtml(d.date)}): ${money(c.remain)}`;
+    if(msg){alerts.push(msg);
+      if('Notification' in window&&Notification.permission==='granted'){
+        const nk='en-naal-notified-'+d.id+'-'+todayStr;
+        try{if(!localStorage.getItem(nk)){new Notification('என் நாள் - கடன்',{body:`${d.person}: ${money(c.remain)} · தேதி ${d.date}`});localStorage.setItem(nk,'1');}}catch(e){}
+      }
+    }
+  });
+  state.debts.forEach(d=>{
+    if(calc(d).remain<=0)return;const ni=nextIntDate(d);if(!ni)return;const n=daysUntil(ni);
+    if(n!==null&&n<=2)alerts.push(`💸 <b>${escapeHtml(d.person)}</b> - வட்டித் தேதி ${n===0?'இன்று':'இன்னும் '+n+' நாளில்'} (${ni})`);
+  });
+  const sd=Number(state.goals.salaryDay||0),today=new Date();
+  const lastDay=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+  if(sd>0&&today.getDate()===Math.min(sd,lastDay)&&Number(state.goals.salary||0)>0){
+    const m=monthKeyNow();
+    if(!state.incomes.some(e=>e.salaryAuto&&String(e.date||'').startsWith(m)))
+      alerts.push(`💼 இன்று சம்பளம் வர வேண்டிய நாள். திட்டமிட்ட சம்பளம்: ${money(state.goals.salary)}`);
+  }
+  if(alerts.length){banner.style.display='block';banner.innerHTML=`<div class="reminder-alert">${alerts.join('<br>')}</div>`;}else banner.style.display='none';
+}
+
+/* ---------- Modals ---------- */
+function showModal(id){$('#'+id).hidden=false;$('#overlay').hidden=false;}
+function hideModals(){['payModal','editModal','photoModal'].forEach(id=>$('#'+id).hidden=true);$('#overlay').hidden=true;payTarget=null;editTarget=null;}
+function openPay(d){
+  payTarget=d;
+  $('#payTitle').textContent=d.type==='owe'?'கடனை திருப்பிக் கொடுத்தேன்':'கடனை வசூலித்தேன்';
+  $('#payInfo').textContent=`${d.person} - மீதம் ${money(calc(d).remain)} / ${money(d.original)}`;
+  $('#payAmount').value='';$('#payDate').value=key(new Date());$('#payLink').checked=true;
+  payUpiUsed=null;$('#upiBox').hidden=d.type!=='owe';$('#payUpi').value=d.upiId||'';
+  $('#upiHint').textContent='UPI ID எழுதினால் தொகையுடன் நேரடியாகப் பணம் செலுத்தும் திரை திறக்கும். எழுதாவிட்டால் Google Pay / PhonePe / Paytm ஆப் மட்டும் திறக்கும்; தொகை நகலெடுக்கப்படும்.';
+  showModal('payModal');setTimeout(()=>$('#payAmount').focus(),50);
+}
+function openEdit(kind,obj){
+  editTarget={kind,obj};const isDebt=kind==='debt';
+  $('#editTitle').textContent=isDebt?'கடனைத் திருத்து':(kind==='income'?'வரவைத் திருத்து':'செலவைத் திருத்து');
+  $('#eNameWrap').hidden=!isDebt;$('#eTimeWrap').hidden=isDebt;
+  $('#eAmountLabel').textContent=isDebt?'மொத்தக் கடன் தொகை (₹)':'தொகை (₹)';
+  $('#eName').value=isDebt?obj.person:'';
+  $('#eAmount').value=isDebt?obj.original:obj.amount;
+  $('#eDate').value=obj.date||key(new Date());
+  $('#eTime').value=obj.time||'';
+  $('#eNote').value=obj.note||'';
+  $('#eRateWrap').hidden=!isDebt;$('#ePhotoWrap').hidden=isDebt;
+  editNewPhoto=null;
+  if(isDebt){$('#eRate').value=obj.rate||'';$('#eRateUnit').value=obj.rateUnit==='year'?'year':'month';$('#eStart').value=obj.start||'';$('#eIntDay').value=obj.intDay||'';if($('#eRateChips').sync)$('#eRateChips').sync();}
+  else{
+    $('#eFile').value='';$('#ePhotoDel').checked=false;
+    const pv=$('#ePhotoPrev');pv.hidden=true;pv.removeAttribute('src');if(pv.dataset.u){URL.revokeObjectURL(pv.dataset.u);delete pv.dataset.u;}
+    if(obj.photoId)getPhoto(obj.photoId).then(b=>{if(b){pv.dataset.u=URL.createObjectURL(b);pv.src=pv.dataset.u;pv.hidden=false;}}).catch(()=>{});
+  }
+  $('#editMsg').style.display='none';
+  showModal('editModal');
+}
+function saveEdit(){
+  if(!editTarget)return;
+  const {kind,obj}=editTarget,msg=$('#editMsg');
+  const fail=t=>{msg.textContent=t;msg.style.display='block';};
+  const amount=Number($('#eAmount').value);
+  if(!(amount>0))return fail('சரியான தொகையை எழுதுங்கள்.');
+  const date=$('#eDate').value;
+  if(kind==='debt'){
+    const person=$('#eName').value.trim();
+    if(!person)return fail('பெயரை காலியாக விட முடியாது.');
+    if(amount<(obj.paidAmount||0))return fail('தொகை ஏற்கெனவே செலுத்திய தொகையைவிடக் குறைவாக இருக்கக்கூடாது.');
+    const idy=$('#eIntDay').value.trim();if(idy&&!(+idy>=1&&+idy<=31))return fail('வட்டி கட்டும் நாள் 1 முதல் 31 வரை இருக்க வேண்டும்.');
+    obj.person=person;obj.original=amount;obj.amount=amount;obj.date=date;obj.note=$('#eNote').value.trim();obj.rate=Math.max(0,parseFloat($('#eRate').value)||0);
+    obj.rateUnit=$('#eRateUnit').value==='year'?'year':'month';obj.start=$('#eStart').value||'';obj.intDay=idy?parseInt(idy,10):0;
+    obj.editedAt=new Date().toISOString();
+    obj.history.push({action:'திருத்தம்',date:key(new Date()),time:nowTime(),person:obj.person,original:amount,note:obj.note});
+  }else{
+    obj.amount=amount;obj.date=date||key(new Date());obj.time=$('#eTime').value;obj.note=$('#eNote').value.trim();
+    if($('#ePhotoDel').checked&&obj.photoId&&!editNewPhoto){delPhoto(obj.photoId);delete obj.photoId;}
+    if(editNewPhoto){const old=obj.photoId,nid=uid();putPhoto(nid,editNewPhoto).catch(()=>toast('படம் சேமிக்க முடியவில்லை'));obj.photoId=nid;if(old)delPhoto(old);editNewPhoto=null;}
+  }
+  save();hideModals();renderAll();toast(language==='en'?'Changes saved':'திருத்தம் சேமிக்கப்பட்டது');
+}
+function removeLinkedTrans(payId){
+  state.incomes=state.incomes.filter(e=>e.linkedPay!==payId);
+  state.expenses=state.expenses.filter(e=>e.linkedPay!==payId);
+}
+function undoLastPayment(d){
+  const p=d.payments[d.payments.length-1];if(!p)return;
+  if(!confirm(`கடைசி பதிவு (${money(p.amount)} - ${p.date}) நீக்கவா?`))return;
+  d.payments.pop();d.paidAmount=Math.max(0,(d.paidAmount||0)-p.amount);removeLinkedTrans(p.id);
+  d.history.push({action:'பதிவு நீக்கம்',date:key(new Date()),time:nowTime(),original:p.amount,note:'கடைசி பணப் பதிவு நீக்கப்பட்டது'});
+  save();renderAll();toast('கடைசி பதிவு நீக்கப்பட்டது');
+}
+
+/* ---------- Render ---------- */
+function monthKeyNow(){return key(new Date()).slice(0,7);}
+function monthTotals(month){
+ const sum=a=>a.filter(e=>String(e.date||'').startsWith(month)).reduce((s,e)=>s+Number(e.amount||0),0);
+ const income=sum(state.incomes),expense=sum(state.expenses);return {income,expense,saving:income-expense};
+}
+function renderHome(){
+ const owe=state.debts.filter(d=>d.type==='owe').reduce((s,d)=>s+calc(d).remain,0);
+ const get=state.debts.filter(d=>d.type==='get').reduce((s,d)=>s+calc(d).remain,0);
+ const net=get-owe;
+ const paidOwe=state.debts.filter(d=>d.type==='owe').reduce((s,d)=>s+(d.paidAmount||0),0),paidGet=state.debts.filter(d=>d.type==='get').reduce((s,d)=>s+(d.paidAmount||0),0);
+ $('#homeStats').innerHTML=
+  `<div class="stat owe"><small>கொடுக்க வேண்டிய மொத்தம்</small><b>${money(owe)}</b><small class="sub">கொடுத்த மொத்தம்: ${money(paidOwe)}</small></div>`+
+  `<div class="stat get"><small>வர வேண்டிய மொத்தம்</small><b>${money(get)}</b><small class="sub">பெற்ற மொத்தம்: ${money(paidGet)}</small></div>`+
+  `<div class="stat net"><small>நிகர நிலை</small><b>${(net>=0?'+ ':'- ')+money(Math.abs(net))}</b><small>${net>=0?'வர வேண்டும்':'கொடுக்க வேண்டும்'}</small></div>`+
+  `<div class="stat" style="background:#fff;border:1px solid #D3DDD8"><small>நபர்கள்</small><b>${new Set(state.debts.filter(d=>calc(d).remain>0).map(d=>d.person.toLowerCase())).size}</b></div>`;
+ const t=monthTotals(monthKeyNow());
+ $('#monthQuick').innerHTML=`<div class="row"><span>வரவு</span><b class="num" style="color:#1A56DB">${money(t.income)}</b></div><div class="row"><span>செலவு</span><b class="num" style="color:#C05B17">${money(t.expense)}</b></div><div class="row"><span>மீதி</span><b class="num" style="color:${t.saving>=0?'#0E6B5B':'#B42318'}">${money(t.saving)}</b></div>`;
+ const up=state.debts.filter(d=>calc(d).remain>0&&d.date).map(d=>({d,diff:daysUntil(d.date)})).filter(x=>x.diff!==null&&x.diff<=7).sort((a,b)=>a.diff-b.diff).slice(0,5);
+ $('#upcomingList').innerHTML=up.length?up.map(({d,diff})=>`<div class="row"><span>${escapeHtml(d.person)} <span class="muted">· ${diff<0?(-diff)+' நாள் தாமதம்':diff===0?'இன்று':diff+' நாளில்'}</span></span><span class="num" style="color:${diff<0?'#B42318':'inherit'}">${d.type==='owe'?'-':'+'} ${money(calc(d).remain)}</span></div>`).join(''):'<p class="muted" style="margin:0">அடுத்த 7 நாட்களில் எதுவும் இல்லை 👍</p>';
+ const map={};
+ state.debts.forEach(d=>{const k=d.person.toLowerCase();if(!map[k])map[k]={name:d.person,owe:0,get:0};const c=calc(d);if(d.type==='owe')map[k].owe+=c.remain;else map[k].get+=c.remain;});
+ const entries=Object.values(map).filter(p=>p.owe>0||p.get>0).sort((a,b)=>(b.owe+b.get)-(a.owe+a.get));
+ $('#summaryList').innerHTML=entries.length?entries.map(p=>`<div class="row"><span>${escapeHtml(p.name)}</span><span class="num">${p.owe?`கொடுக்க ${money(p.owe)}`:''}${p.owe&&p.get?' | ':''}${p.get?`வர ${money(p.get)}`:''}</span></div>`).join(''):'<p class="muted" style="margin:0">கடன் இல்லை</p>';
+}
+function renderDebtStats(){
+ const owe=state.debts.filter(d=>d.type==='owe').reduce((s,d)=>s+calc(d).remain,0);
+ const get=state.debts.filter(d=>d.type==='get').reduce((s,d)=>s+calc(d).remain,0);
+ const intOf=t=>state.debts.filter(d=>d.type===t).reduce((s,d)=>s+((interestInfo(d)||{}).interest||0),0),io=intOf('owe'),ig=intOf('get');
+ const pO=state.debts.filter(d=>d.type==='owe').reduce((s,d)=>s+(d.paidAmount||0),0),pG=state.debts.filter(d=>d.type==='get').reduce((s,d)=>s+(d.paidAmount||0),0);
+ $('#debtStats').innerHTML=`<div class="stat owe"><small>கொடுக்க மீதம்</small><b>${money(owe)}</b><small class="sub">கொடுத்த மொத்தம்: ${money(pO)}</small></div><div class="stat get"><small>வர மீதம்</small><b>${money(get)}</b><small class="sub">பெற்ற மொத்தம்: ${money(pG)}</small></div>`+((io>0||ig>0)?`<div class="stat owe"><small>கொடுக்க வட்டி (தோராயம்)</small><b>${money(io)}</b></div><div class="stat get"><small>வர வட்டி (தோராயம்)</small><b>${money(ig)}</b></div>`:'');
+ $('#peopleList').innerHTML=[...new Set(state.debts.map(d=>d.person))].map(n=>`<option value="${escapeHtml(n)}">`).join('');
+}
+function renderDebtList(){
+ const q=$('#searchPerson').value.trim().toLowerCase(),f=$('#filterPaid').value,list=$('#personList');
+ const arr=state.debts.filter(d=>d.type===debtFilter)
+  .filter(d=>!q||d.person.toLowerCase().includes(q))
+  .filter(d=>{const r=calc(d).remain;return f==='unpaid'?r>0:f==='paid'?r===0:true;})
+  .sort((a,b)=>{const ra=calc(a).remain>0,rb=calc(b).remain>0;if(ra!==rb)return ra?-1:1;return String(a.date||'9999').localeCompare(String(b.date||'9999'));});
+ list.innerHTML='';
+ if(!arr.length){list.innerHTML='<p class="muted" style="padding:8px">கடன் இல்லை</p>';return;}
+ arr.forEach(d=>{
+  const c=calc(d),done=c.remain===0,pct=d.original?Math.min(100,c.paid/d.original*100):0;
+  const diff=daysUntil(d.date),late=!done&&diff!==null&&diff<0,ii=interestInfo(d);
+  const div=document.createElement('div');div.className='person-card'+(d.id===newDebtId?' new':'')+(late?' late':'');div.id='debt-'+d.id;
+  div.innerHTML=`
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+  <div style="font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div style="width:30px;height:30px;border-radius:50%;background:#D7EDE6;color:#0E6B5B;display:grid;place-items:center;font-weight:700;font-size:.8rem">${escapeHtml(initial(d.person))}</div>
+    ${escapeHtml(d.person)} <span class="badge ${done?'done':d.type==='owe'?'owe':'get'}">${done?'முடிந்தது':d.type==='owe'?'கொடுக்கணும்':'வரணும்'}</span>
+    ${late?`<span class="badge late">${-diff} நாள் தாமதம்</span>`:''}
+  </div>
+  <div class="num" style="text-align:right;white-space:nowrap">மீதம்: ${money(c.remain)}</div>
+</div>
+<div style="background:#F5F8F6;padding:6px 10px;border-radius:8px;font-size:.8rem;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+  <span>மொத்தக் கடன்: <b class="num">${money(d.original)}</b></span>
+  <span>செலுத்தியது/பெற்றது: <b class="num" style="color:#0E6B5B">${money(c.paid)}</b></span>
+</div>
+<div class="progress"><i style="width:${pct}%"></i></div>
+<div style="background:#F5F8F6;border-radius:8px;padding:8px;font-size:.85rem">
+<div class="row"><span>தேதி: <b>${escapeHtml(d.date||'-')}</b> · குறிப்பு: ${escapeHtml(d.note||'-')}</span></div>
+${d.rate>0?`<div class="row"><span>வட்டி: <b>${d.rate}%</b>/${d.rateUnit==='year'?'வருடம்':'மாதம்'} <span class="muted">(≈ ${d.rateUnit==='year'?(d.rate/12).toFixed(2)+'%/மாதம்':(d.rate*12).toFixed(2)+'%/வருடம்'})</span>${ii?` · ${ii.months.toFixed(1)} மாதம் → ≈ <b class="num">${money(ii.interest)}</b>`:''}</span>${ii?`<span class="num">மொத்தம் ≈ ${money(ii.total)}</span>`:''}</div>${ii?'':`<div class="row notice-row"><span class="muted">வட்டித் தொகை கணக்கிட "கடன் தொடங்கிய தேதி"-ஐத் திருத்தி சேர்க்கவும்.</span></div>`}`:''}
+${dateNotices(d)}
+${d.payments.map(p=>`<div class="row"><span>↳ ${escapeHtml(p.date)} ${d.type==='owe'?'செலுத்தியது':'பெற்றது'}${p.method==='UPI'?' · '+(APPN[p.app]||'UPI'):''}</span><span class="num">- ${money(p.amount)}</span></div>`).join('')}
+<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+${done?'':`<button class="btn primary small btnPay" type="button">💰 பணம் செலுத்து</button>`}
+${d.payments.length?`<button class="btn small btnUndo" type="button">↶ கடைசி பதிவு நீக்கு</button>`:''}
+<button class="btn small btnEditDebt" type="button">திருத்து</button>
+<button class="btn small danger btnDel" type="button">நீக்கு</button>
+</div></div>`;
+  div.querySelector('.btnPay')?.addEventListener('click',()=>openPay(d));
+  div.querySelector('.btnUndo')?.addEventListener('click',()=>undoLastPayment(d));
+  div.querySelector('.btnEditDebt').addEventListener('click',()=>openEdit('debt',d));
+  div.querySelector('.btnDel').addEventListener('click',()=>{
+    if(confirm('இந்தக் கடனை நீக்கவா? தொடர்புடைய வரவு-செலவுப் பதிவுகளும் நீக்கப்படும்.')){
+      d.payments.forEach(p=>removeLinkedTrans(p.id));
+      state.debts=state.debts.filter(x=>x.id!==d.id);save();renderAll();toast('நீக்கப்பட்டது');
+    }
+  });
+  list.appendChild(div);
+ });
+ if(newDebtId){const id=newDebtId;setTimeout(()=>{if(newDebtId===id)newDebtId=null;const el=document.getElementById('debt-'+id);el&&el.classList.remove('new');},2500);}
+}
+function formatTime(t){
+ if(!t)return '';
+ const parts=String(t).split(':');let h=Number(parts[0]);const m=parts[1]||'00';
+ if(isNaN(h))return '';
+ const ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${m} ${ap}`;
+}
+function filteredTrans(){
+ const month=$('#monthFilter').value||'',day=$('#dayFilter').value||'',q=($('#transSearch').value||'').trim().toLowerCase();
+ return (transType==='income'?state.incomes:state.expenses).slice()
+  .filter(e=>!month||String(e.date||'').startsWith(month)).filter(e=>!day||e.date===day)
+  .filter(e=>!q||(String(e.note||'')+' '+String(e.cat||'')).toLowerCase().includes(q))
+  .sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.time||'').localeCompare(String(a.time||'')));
+}
+function renderTrans(){
+ const list=$('#transList');list.innerHTML='';thumbURLs.splice(0).forEach(u=>URL.revokeObjectURL(u));
+ const month=$('#monthFilter').value||'',day=$('#dayFilter').value||'',arr=filteredTrans();
+ const total=arr.reduce((s,e)=>s+(Number(e.amount||0),0),en=language==='en';
+ $('#monthSummary').textContent=`${month||(en?'All months':'எல்லா மாதங்களும்')}${day?' · '+day:''} | ${arr.length} ${en?'records':'பதிவுகள்'} | ${en?'Total':'மொத்தம்'} ${money(total)}`;
+ if(!arr.length)list.innerHTML=`<p class="muted">${en?'No records for this date':'இந்த தேதியில் பதிவுகள் இல்லை'}</p>`;
+ arr.forEach(e=>{
+  const r=document.createElement('div');r.className='row';
+  const left=document.createElement('span');left.textContent=`${e.date} ${formatTime(e.time)} · ${e.cat?e.cat+(e.note?' - '+e.note:''):(e.note||'')}`;
+  const right=document.createElement('span');right.style.cssText='display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end';
+  const amt=document.createElement('span');amt.className='num';amt.textContent=`${transType==='income'?'+ ':'- '}${money(e.amount)}`;
+  const ed=document.createElement('button');ed.className='btn small';ed.type='button';ed.textContent=en?'Edit':'திருத்து';ed.addEventListener('click',()=>openEdit(transType,e));
+  const del=document.createElement('button');del.className='btn small danger';del.type='button';del.textContent=en?'Delete':'நீக்கு';del.addEventListener('click',()=>deleteTrans(e,transType));
+  if(e.photoId){const im=document.createElement('img');im.className='thumb';im.alt=en?'Photo':'புகைப்படம்';im.addEventListener('click',()=>showPhoto(e.photoId));loadThumb(im,e.photoId);right.append(im);}
+  right.append(amt,ed,del);r.append(left,right);list.appendChild(r);
+ });
+}
+function deleteTrans(entry,kind){
+ const en=language==='en';
+ const msg=entry.linkedPay?(en?'This record is linked to a debt payment. Delete only this entry?':'இந்தப் பதிவு ஒரு கடன் செலுத்துதலுடன் இணைக்கப்பட்டுள்ளது. இதை மட்டும் நீக்கவா?'):(en?'Delete this record?':'இந்த பதிவை நீக்கவா?');
+ if(!confirm(msg))return;
+ const arr=kind==='income'?state.incomes:state.expenses,idx=arr.findIndex(x=>x.id===entry.id);
+ if(idx>=0){arr.splice(idx,1);if(entry.photoId)delPhoto(entry.photoId);save();renderAll();toast(en?'Deleted':'நீக்கப்பட்டது');}
+}
+function drawMonthlyChart(){
+ const canvas=$('#monthlyChart');if(!canvas)return;const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);
+ const m=$('#reportMonth').value||monthKeyNow(),t=monthTotals(m),vals=[t.income,t.expense,Math.max(0,t.saving)],labels=['வரவு','செலவு','சேமிப்பு'];
+ const max=Math.max(...vals,1),base=h-42,barW=90,gap=85,start=55;
+ ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillStyle='#566862';ctx.fillText(m,w/2,22);
+ vals.forEach((v,i)=>{const bh=(v/max)*(h-95),x=start+i*(barW+gap),y=base-bh;ctx.fillStyle=['#1A56DB','#C05B17','#0E6B5B'][i];ctx.fillRect(x,y,barW,bh);ctx.fillStyle='#13211D';ctx.font='14px sans-serif';ctx.fillText(labels[i],x+barW/2,h-18);ctx.font='12px sans-serif';ctx.fillText(money(v),x+barW/2,Math.max(42,y-8));});
+}
+function renderReport(){
+ const month=$('#reportMonth').value||monthKeyNow(),t=monthTotals(month),el=$('#reportStats');
+ el.innerHTML=`<div class="stat get"><small>மொத்த வரவு</small><b>${money(t.income)}</b></div><div class="stat owe"><small>மொத்த செலவு</small><b>${money(t.expense)}</b></div><div class="stat net"><small>சேமிப்பு / மீதி</small><b>${money(t.saving)}</b></div><div class="stat" style="background:#F5F8F6"><small>மாத சேமிப்பு இலக்கு</small><b>${money(state.goals.savingTarget||0)}</b></div>`;
+ drawMonthlyChart();drawTrend();drawDonut();
+ // category breakdown
+ const cats={};state.expenses.filter(e=>String(e.date||'').startsWith(month)).forEach(e=>{cats[e.cat||'மற்றவை']=(cats[e.cat||'மற்றவை']||0)+Number(e.amount||0);});
+ const ce=Object.entries(cats).sort((a,b)=>b[1]-a[1]),mx=Math.max(...ce.map(x=>x[1]),1);
+ $('#catBreakdown').innerHTML=ce.length?ce.map(([c,v])=>`<div class="row"><span style="min-width:90px">${escapeHtml(c)}</span><span class="cat-bar" style="flex:1"><i style="width:${Math.max(4,v/mx*100)}%"></i></span><span class="num">${money(v)}</span></div>`).join(''):'<p class="muted">இந்த மாதம் செலவு இல்லை</p>';
+ const hist=$('#debtHistoryList'),rows=[];
+ state.debts.forEach(d=>{
+  rows.push({date:d.date||'',time:'',name:d.person,action:'கடன் சேர்த்தல்',amount:d.original,note:d.note||''});
+  d.payments.forEach(p=>rows.push({date:p.date||'',time:p.time||'',name:d.person,action:d.type==='owe'?'செலுத்தியது':'பெற்றது',amount:p.amount,note:''}));
+  d.history.forEach(h=>rows.push({date:h.date||'',time:h.time||'',name:d.person,action:h.action||'திருத்தம்',amount:Number(h.original||0),note:h.note||''}));
+ });
+ rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.time).localeCompare(String(a.time)));
+ hist.innerHTML=rows.length?rows.map(r=>`<div class="row"><span><b>${escapeHtml(r.name)}</b><br>${escapeHtml(r.date)} ${escapeHtml(formatTime(r.time))} · ${escapeHtml(r.action)}<br><span class="muted">${escapeHtml(r.note)}</span></span><span class="num">${money(r.amount)}</span></div>`).join(''):'<p class="muted">கடன் வரலாறு இல்லை</p>';
+}
+function renderGoals(){
+ const g=state.goals;
+ [['salaryAmount',g.salary],['salaryDay',g.salaryDay],['savingTarget',g.savingTarget],['goalName',g.goalName],['goalAmount',g.goalAmount],['goalSaved',g.goalSaved]].forEach(([id,v])=>{const el=$('#'+id);if(el&&document.activeElement!==el)el.value=v??'';});
+ const m=monthTotals(monthKeyNow()),target=Number(g.goalAmount||0),saved=Number(g.goalSaved||0),pct=target>0?Math.min(100,saved/target*100):0;
+ const st=Number(g.savingTarget||0),stPct=st>0?Math.max(0,Math.min(100,m.saving/st*100)):0;
+ $('#goalSummary').innerHTML=`<div class="row"><span>இந்த மாத வரவு − செலவு</span><b class="num">${money(m.saving)}</b></div>${st>0?`<div class="goal-bar"><i style="width:${stPct}%"></i></div><p class="muted" style="margin:0">மாத இலக்கில் ${stPct.toFixed(0)}% (${money(st)})</p>`:''}<div class="row"><span>இலக்கு: ${escapeHtml(g.goalName||'சேமிப்பு இலக்கு')}</span><b class="num">${money(saved)} / ${money(target)}</b></div><div class="goal-bar"><i style="width:${pct}%"></i></div><p class="muted" style="margin:0">இலக்கில் ${pct.toFixed(1)}% நிறைவு · மீதி ${money(Math.max(0,target-saved))}</p>`;
+ $('#notificationStatus').textContent=('Notification' in window)?(Notification.permission==='granted'?'அறிவிப்புகள் அனுமதிக்கப்பட்டுள்ளன':Notification.permission==='denied'?'அறிவிப்புகள் தடுக்கப்பட்டுள்ளன; browser settings-ல் மாற்றவும்':'அறிவிப்புகளுக்கு அனுமதி இன்னும் வழங்கப்படவில்லை'):'இந்த உலாவியில் அறிவிப்புகள் ஆதரிக்கப்படவில்லை';
+}
+function renderAll(){renderHome();renderDebtStats();renderDebtList();renderTrans();renderReport();renderGoals();renderPinStatus();syncBackupUI();checkReminders();checkBackupBanner();}
+
+/* ---------- Export ---------- */
+function exportTransactionsPDF(mode){
+ const isEn=language==='en',date=$('#dayFilter').value,month=$('#monthFilter').value,kind=transType;
+ let entries=(kind==='income'?state.incomes:state.expenses).slice();
+ if(mode==='day'){const chosen=date||key(new Date());entries=entries.filter(e=>e.date===chosen);if(!entries.length){alert(isEn?'No transactions for the selected day.':'தேர்ந்தெடுத்த நாளில் பதிவுகள் இல்லை.');return;}}
+ else{const cm=month||key(new Date()).slice(0,7);entries=entries.filter(e=>String(e.date||'').startsWith(cm));if(!entries.length){alert(isEn?'No transactions for the selected month.':'தேர்ந்தெடுத்த மாதத்தில் பதிவுகள் இல்லை.');return;}}
+ entries.sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.time||'').localeCompare(String(b.time||'')));
+ const title=mode==='day'?(isEn?'Daily transactions':'தினசரி வரவு–செலவு'):(isEn?'Monthly transactions':'மாதாந்திர வரவு–செலவு');
+ const heading=kind==='income'?(isEn?'Income':'வரவு'):(isEn?'Expense':'செலவு');
+ const period=mode==='day'?(date||key(new Date())):(month||key(new Date()).slice(0,7));
+ const total=entries.reduce((s,e)=>s+Number(e.amount||0),0);
+ const rows=entries.map((e,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(e.date)}</td><td>${formatTime(e.time)}</td><td>${escapeHtml(e.cat)}</td><td>${escapeHtml(e.note)}</td><td class="amount">${money(e.amount)}</td></tr>`).join('');
+ const win=window.open('','_blank');
+ if(!win){alert(isEn?'Allow pop-ups for this file to create the PDF.':'PDF உருவாக்க Pop-up திறப்பதற்கு அனுமதி அளிக்கவும்.');return;}
+ win.document.write(`<!doctype html><html lang="${isEn?'en':'ta'}"><head><meta charset="utf-8"><title>${title}</title><style>
+ body{font-family:Arial,"Noto Sans Tamil",sans-serif;padding:24px;color:#17221f}h1{font-size:22px}p{margin:6px 0 18px}
+ table{border-collapse:collapse;width:100%}th,td{border:1px solid #aebbb5;padding:8px;text-align:left;font-size:12px}
+ th{background:#e8f1ed}.amount{text-align:right;font-weight:bold}.total{margin-top:16px;font-size:16px;font-weight:bold}
+ @media print{body{padding:0}button{display:none}}</style></head><body><h1>${title}</h1><p>${heading} · ${escapeHtml(period)}</p>
+ <table><thead><tr><th>#</th><th>${isEn?'Date':'தேதி'}</th><th>${isEn?'Time':'நேரம்'}</th><th>${isEn?'Category':'வகை'}</th><th>${isEn?'Description':'விவரம்'}</th><th>${isEn?'Amount':'தொகை'}</th></tr></thead><tbody>${rows}</tbody></table>
+ <div class="total">${isEn?'Total':'மொத்தம்'}: ${money(total)}</div>
+ <p>${isEn?'Generated from My Day - Debts':'என் நாள் - கடன் கணக்கிலிருந்து உருவாக்கப்பட்டது'}</p><button onclick="window.print()">${isEn?'Print / Save as PDF':'அச்சிடு / PDF ஆக சேமி'}</button><script>setTimeout(function(){window.print()},500)<\/script></body></html>`);
+ win.document.close();
+}
+const csvCell=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+function downloadFile(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function downloadCSV(filename,headers,rows){downloadFile(filename,'\ufeff'+[headers,+rows].map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8;');}
+function exportTransactionCSV(kind){const arr=kind==='income'?state.incomes:state.expenses;downloadCSV(kind+'-en-naal-'+key(new Date())+'.csv',['தேதி','நேரம்','வகை','விவரம்','தொகை'],arr.map(e=>[e.date,formatTime(e.time),e.cat,e.note,e.amount]));}
+function exportDebtCSV(){downloadCSV('debt-summary-'+key(new Date())+'.csv',['நபர்','கடன் வகை','மொத்தக் கடன்','செலுத்தியது/பெற்றது','மீதம்','காலக்கெடு','குறிப்பு'],state.debts.map(d=>[d.person,d.type==='owe'?'கொடுக்க வேண்டியது':'வர வேண்டியது',d.original,d.paidAmount,calc(d).remain,d.date,d.note]));}
+function exportHistoryCSV(){const rows=[];state.debts.forEach(d=>{rows.push([d.date,'',d.person,'கடன் சேர்த்தல்',d.original,d.note||'']);d.payments.forEach(p=>rows.push([p.date,p.time||'',d.person,d.type==='owe'?'செலுத்தியது':'பெற்றது',p.amount,d.note||'']));d.history.forEach(h=>rows.push([h.date,h.time||'',d.person,h.action||'திருத்தம்',h.original||'',h.note||'']));});downloadCSV('debt-history-'+key(new Date())+'.csv',['தேதி','நேரம்','நபர்','செயல்','தொகை','குறிப்பு'],rows);}
+async function downloadBackup(withPhotos){
+ const out={...state};
+ if(withPhotos){
+  try{
+   const keys=await allPhotoKeys(),photos={},used=new Set([...state.expenses,...state.incomes].map(e=>e.photoId).filter(Boolean));
+   for(const k of keys){if(!used.has(k))continue;const b=await getPhoto(k);if(b)photos[k]=await blobToDataURL(b);}
+   out.photos=photos;
+  }catch(e){toast('படங்களைச் சேர்க்க முடியவில்லை; எழுத்துத் தரவு மட்டும் சேமிக்கப்படும்');}
+ }
+ downloadFile('en-naal-backup-'+key(new Date())+(withPhotos?'-photos':'')+'.json',JSON.stringify(out,null,withPhotos?0:2),'application/json;charset=utf-8');
+ lsSet(BK_KEY,key(new Date()));updateBackupInfo();syncBackupUI();checkBackupBanner();
+}
+function updateBackupInfo(){let d='';try{d=localStorage.getItem('en-naal-last-backup')||'';}catch(e){}$('#lastBackupInfo').textContent=d?'கடைசி JSON காப்பு: '+d:'இன்னும் JSON காப்புப் பிரதி எடுக்கவில்லை - தரவு இந்த உலாவியில் மட்டுமே உள்ளது.';}
+async function restoreFrom(obj){
+ if(!obj||!Array.isArray(obj.debts)||!Array.isArray(obj.expenses)||!Array.isArray(obj.incomes))throw new Error('invalid');
+ if(!confirm('தற்போதைய தரவை இந்தக் காப்புப் பிரதியால் மாற்றவா? முதலில் காப்புப் பிரதி எடுத்துள்ளீர்களா?'))return false;
+ state=normalize(obj);save();
+ if(obj.photos&&typeof obj.photos==='object'){await Promise.all(Object.entries(obj.photos).map(async e=>{try{await putPhoto(e[0],await dataURLToBlob(e[1]));}catch(err){}}));}
+ renderAll();toast('காப்புப் பிரதி மீட்டெடுக்கப்பட்டது');return true;
+}
+
+/* ---------- Events ---------- */
+$('#saveDebtBtn').addEventListener('click',()=>{
+ const msgEl=$('#formMsg');msgEl.style.display='none';
+ const person=$('#person').value.trim(),amount=parseFloat($('#amount').value);
+ if(!person){msgEl.textContent='⚠️ நபர் பெயரை எழுதுங்க';msgEl.style.display='block';$('#person').focus();return;}
+ if(isNaN(amount)||amount<=0){msgEl.textContent='⚠️ தொகையை சரியா எழுதுங்க';msgEl.style.display='block';$('#amount').focus();return;}
+ const type=$('#typeSel').value;
+ const idy=$('#intDay').value.trim();
+ if(idy&&!(+idy>=1&&+idy<=31)){msgEl.textContent='⚠️ வட்டி கட்டும் நாள் 1 முதல் 31 வரை இருக்க வேண்டும்';msgEl.style.display='block';$('#intDay').focus();return;}
+ const nd={id:uid(),person,original:amount,amount,paidAmount:0,payments:[],history:[],type,note:$('#note').value.trim(),date:$('#date').value||key(new Date()),rate:Math.max(0,parseFloat($('#rate').value)||0),rateUnit:$('#rateUnit').value==='year'?'year':'month',start:$('#startDate').value||key(new Date()),intDay:idy?parseInt(idy,10):0,upiId:''};
+ state.debts.unshift(nd);if(!save())return;
+ newDebtId=nd.id;debtFilter=type;
+ document.querySelectorAll('[data-debt]').forEach(b=>b.classList.toggle('on',b.dataset.debt===debtFilter));
+ $('#person').value='';$('#amount').value='';$('#note').value='';$('#rate').value='';$('#intDay').value='';$('#startDate').value=key(new Date());$('#rateUnit').value='month';if($('#rateChips').sync)$('#rateChips').sync();$('#filterPaid').value='all';$('#searchPerson').value='';
+ renderAll();
+ setTimeout(()=>{const el=document.getElementById('debt-'+nd.id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});toast('✅ சேமிக்கப்பட்டது: '+person+' - '+money(amount));},150);
+});
+$('#typeSel').addEventListener('change',()=>{debtFilter=$('#typeSel').value;document.querySelectorAll('[data-debt]').forEach(b=>b.classList.toggle('on',b.dataset.debt===debtFilter));renderDebtList();});
+$('#saveTransBtn').addEventListener('click',()=>{
+ const amt=parseFloat($('#tAmount').value);if(!(amt>0)){toast('தொகை எழுதுங்க');return;}
+ const entry={id:uid(),amount:amt,cat:$('#tCat').value,note:$('#tNote').value.trim(),date:$('#tDate').value||key(new Date()),time:$('#tTime').value||nowTime()};
+ if(pendingPhoto){entry.photoId=uid();putPhoto(entry.photoId,pendingPhoto).catch(()=>toast('படம் சேமிக்க முடியவில்லை'));}
+ (transType==='income'?state.incomes:state.expenses).unshift(entry);
+ if(save()){$('#tAmount').value='';$('#tNote').value='';clearPendingPhoto();renderAll();toast('சேமிக்கப்பட்டது');}
+});
+$('#paySave').addEventListener('click',()=>{
+ if(!payTarget)return;
+ let amt=parseFloat($('#payAmount').value);if(!(amt>0)){toast('தொகையை எழுதுங்க');return;}
+ const rem=calc(payTarget).remain;let clipped=false;
+ if(amt>rem){amt=rem;clipped=true;}
+ const d=payTarget,date=$('#payDate').value||key(new Date()),time=nowTime();
+ const p={id:uid(),amount:amt,date,time};
+ if(payUpiUsed){p.method='UPI';p.app=payUpiUsed;}
+ d.payments.push(p);d.paidAmount=Math.round(((d.paidAmount||0)+amt)*100)/100;
+ if($('#payLink').checked){
+  const owe=d.type==='owe',label=owe?'கடன் திருப்பம்':'கடன் வசூல்';
+  (owe?state.expenses:state.incomes).unshift({id:uid(),amount:amt,cat:label,note:`${d.person} - ${label}${p.method==='UPI'?' ('+(APPN[p.app]||'UPI')+')':''}`,date,time,linkedPay:p.id});
+ }
+ save();hideModals();renderAll();
+ toast(clipped?`மீதத் தொகை ${money(amt)} மட்டும் பதிவாகியது`:'பணம் சேமிக்கப்பட்டது');
+});
+$('#payFull').addEventListener('click',()=>{if(payTarget)$('#payAmount').value=calc(payTarget).remain;});
+['payCancel','payClose','editCancel','editClose','photoClose'].forEach(id=>$('#'+id).addEventListener('click',e=>{e.preventDefault();hideModals();}));
+$('#editSave').addEventListener('click',saveEdit);
+$('#overlay').addEventListener('click',hideModals);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hideModals();});
+document.querySelectorAll('[data-debt]').forEach(b=>b.addEventListener('click',()=>{debtFilter=b.dataset.debt;document.querySelectorAll('[data-debt]').forEach(x=>x.classList.toggle('on',x.dataset.debt===debtFilter));$('#typeSel').value=debtFilter;renderDebtList();}));
+document.querySelectorAll('[data-trans]').forEach(b=>b.addEventListener('click',()=>{transType=b.dataset.trans;document.querySelectorAll('[data-trans]').forEach(x=>x.classList.toggle('on',x.dataset.trans===transType));updateCat();renderTrans();}));
+function updateCat(){const sel=$('#tCat');sel.innerHTML='';(transType==='income'?['சம்பளம்','வியாபாரம்','கடன் வசூல்','மற்ற வரவு']:['உணவு','போக்குவரத்து','மளிகை','பில்கள்','மருத்துவம்','கடன் திருப்பம்','மற்றவை']).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});}
+updateCat();
+$('#searchPerson').addEventListener('input',renderDebtList);$('#filterPaid').addEventListener('change',renderDebtList);
+$('#transSearch').addEventListener('input',renderTrans);
+$('#monthFilter').addEventListener('change',()=>{$('#dayFilter').value='';renderTrans();});
+$('#dayFilter').addEventListener('change',()=>{$('#monthFilter').value='';renderTrans();});
+$('#clearDateFilter').addEventListener('click',()=>{$('#monthFilter').value='';$('#dayFilter').value='';renderTrans();});
+$('#dailyPdfBtn').addEventListener('click',()=>exportTransactionsPDF('day'));
+$('#monthlyPdfBtn').addEventListener('click',()=>exportTransactionsPDF('month'));
+function showTab(name){['home','debt','trans','report','goals'].forEach(n=>$('#tab-'+n).hidden=n!==name);document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===name));window.scrollTo(0,0);if(name==='report')renderReport();}
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+$('#langBtn').addEventListener('click',()=>{language=language==='ta'?'en':'ta';applyLanguage();});
+$('#backupBtn').addEventListener('click',()=>{const b=$('#backup');b.hidden=!b.hidden;if(!b.hidden){$('#backupText').value=JSON.stringify(state);updateBackupInfo();}});
+$('#copyBtn').addEventListener('click',()=>{navigator.clipboard.writeText(JSON.stringify(state)).then(()=>toast('Copied'),()=>toast('Copy failed'));});
+$('#restoreBtn').addEventListener('click',()=>{let o;try{o=JSON.parse($('#backupText').value);}catch(e){toast('தவறான காப்புப் பிரதி உரை');return;}restoreFrom(o).catch(()=>toast('தவறான காப்புப் பிரதி உரை'));});
+$('#downloadBackupBtn').addEventListener('click',()=>downloadBackup(false));
+$('#downloadBackupPhotosBtn').addEventListener('click',()=>downloadBackup(true));
+$('#backupFile').addEventListener('change',async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{await restoreFrom(JSON.parse(await file.text()));}catch(err){alert('சரியான என் நாள் JSON காப்புப் பிரதி கோப்பைத் தேர்வு செய்யவும்.');}
+ finally{e.target.value='';}
+});
+$('#reportMonth').addEventListener('change',renderReport);
+$('#exportIncomeCsv').addEventListener('click',()=>exportTransactionCSV('income'));
+$('#exportExpenseCsv').addEventListener('click',()=>exportTransactionCSV('expense'));
+$('#exportDebtCsv').addEventListener('click',exportDebtCSV);
+$('#exportHistoryCsv').addEventListener('click',exportHistoryCSV);
+$('#saveGoalsBtn').addEventListener('click',()=>{
+ const salary=Number($('#salaryAmount').value||0),salaryDay=Number($('#salaryDay').value||5),savingTarget=Number($('#savingTarget').value||0),goalAmount=Number($('#goalAmount').value||0),goalSaved=Number($('#goalSaved').value||0);
+ if([salary,savingTarget,goalAmount,goalSaved].some(n=>n<0)||salaryDay<1||salaryDay>31){alert('தொகைகளை 0 அல்லது அதற்கு மேல்; சம்பள தேதியை 1–31 என உள்ளிடவும்.');return;}
+ state.goals={salary,salaryDay,savingTarget,goalName:$('#goalName').value.trim(),goalAmount,goalSaved};save();renderAll();toast('சம்பளம் மற்றும் இலக்குகள் சேமிக்கப்பட்டன');
+});
+$('#recordSalaryBtn').addEventListener('click',()=>{
+ const salary=Number($('#salaryAmount').value||state.goals.salary||0);if(!(salary>0)){alert('முதலில் மாத சம்பளத் தொகையை உள்ளிடவும்.');return;}
+ const month=monthKeyNow();
+ if(state.incomes.some(e=>String(e.date||'').startsWith(month)&&e.cat==='சம்பளம்'&&e.salaryAuto)){alert('இந்த மாத சம்பளம் ஏற்கெனவே பதிவு செய்யப்பட்டுள்ளது.');return;}
+ state.incomes.unshift({id:uid(),amount:salary,cat:'சம்பளம்',note:'மாத சம்பளம்',date:key(new Date()),time:nowTime(),salaryAuto:true});
+ state.goals.salary=salary;save();renderAll();toast('இந்த மாத சம்பளம் வரவாகப் பதிவு செய்யப்பட்டது');
+});
+$('#enableNotificationsBtn').addEventListener('click',async()=>{
+ if(!('Notification' in window)){alert('இந்த browser notification-ஐ ஆதரிக்கவில்லை.');return;}
+ try{const p=await Notification.requestPermission();renderGoals();if(p==='granted'){checkReminders();toast('அறிவிப்புகள் இயங்குகின்றன');}else toast('அறிவிப்பு அனுமதி கிடைக்கவில்லை');}catch(e){toast('அறிவிப்புகளை இயக்க முடியவில்லை');}
+});
+['date','tDate','payDate','eDate'].forEach(id=>$('#'+id).addEventListener('click',function(){try{this.showPicker();}catch(e){}}));
+
+$('#date').value=key(new Date());$('#tDate').value=key(new Date());$('#tTime').value=nowTime();$('#monthFilter').value=monthKeyNow();$('#reportMonth').value=monthKeyNow();
+$('#today').textContent=new Date().toLocaleDateString('ta-IN',{weekday:'long',day:'numeric',month:'long'});
+/* ---------- v7 wiring ---------- */
+(function(){
+ const k=$('#lockKeys');
+ ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(x=>{
+  const b=document.createElement('button');b.type='button';
+  if(!x){b.disabled=true;b.style.visibility='hidden';}else{b.textContent=x;b.setAttribute('aria-label',x==='⌫'?'அழி':x);b.addEventListener('click',()=>lockKey(x));}
+  k.appendChild(b);
+ });
+ document.addEventListener('keydown',e=>{
+  if(!$('#lock').classList.contains('show')&&!document.documentElement.classList.contains('locked'))return;
+  if(/^[0-9]$/.test(e.key))lockKey(e.key);else if(e.key==='Backspace')lockKey('⌫');
+ });
+})();
+$('#lockCancel').addEventListener('click',()=>{lockAfter=null;closeLock();});
+$('#lockForgot').addEventListener('click',()=>{
+ if(!confirm('PIN மறந்துவிட்டால் ஒரே வழி: இந்த ஆப்பில் உள்ள அனைத்துத் தரவையும் அழித்துப் புதிதாகத் தொடங்குவது (JSON காப்புப் பிரதி இருந்தால் பின்னர் மீட்டெடுக்கலாம்). தொடரவா?'))return;
+ if(!confirm('உறுதியாக அனைத்தையும் அழிக்கவா? இதைத் திரும்பப் பெற முடியாது.'))return;
+ try{localStorage.removeItem(KEY);localStorage.removeItem('en-naal-v4-final');localStorage.removeItem(PIN_KEY);}catch(e){}
+ try{indexedDB.deleteDatabase('en-naal-photos');}catch(e){}
+ location.reload();
+});
+$('#pinSetBtn').addEventListener('click',()=>{
+ if(!canHash()){toast('இந்த உலாவியில் PIN ஆதரவு இல்லை');return;}
+ if(!confirm('PIN-ஐ மறந்துவிட்டால் தரவை அழித்துத்தான் மீட்க முடியும். முதலில் JSON காப்புப் பிரதி எடுத்து வைத்துள்ளீர்களா? தொடரவா?'))return;
+ openLock('set1');
+});
+$('#pinChangeBtn').addEventListener('click',()=>{lockAfter=()=>openLock('set1');openLock('verify');});
+$('#pinRemoveBtn').addEventListener('click',()=>{lockAfter=()=>{try{localStorage.removeItem(PIN_KEY);}catch(e){}closeLock();renderPinStatus();toast('PIN நீக்கப்பட்டது');};openLock('verify');});
+$('#backupDays').addEventListener('change',e=>{lsSet(DAYS_KEY,e.target.value);lsSet(SN_KEY,'');checkBackupBanner();toast('நினைவூட்டல் அமைப்பு சேமிக்கப்பட்டது');});
+['tCam','tPhoto'].forEach(id=>$('#'+id).addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(f)await pickPhoto(f,false);e.target.value='';}));
+$('#tPhotoClear').addEventListener('click',clearPendingPhoto);
+$('#eFile').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(f)await pickPhoto(f,true);});
+$('#emiBtn').addEventListener('click',()=>{
+ const P=parseFloat($('#emiP').value),R=parseFloat($('#emiR').value),N=parseInt($('#emiN').value,10),el=$('#emiRes');el.hidden=false;
+ if(!(P>0)||!(N>0)||isNaN(R)||R<0){el.textContent='கடன் தொகை, வட்டி %, மாதங்கள் மூன்றையும் சரியாக உள்ளிடுக.';return;}
+ const r=R/12/100,emi=r===0?P/N:P*r*Math.pow(1+r,N)/(Math.pow(1+r,N)-1),total=emi*N;
+ el.innerHTML='மாத EMI: <b class="num">'+money(Math.round(emi*100)/100)+'</b><br>மொத்தம் செலுத்த வேண்டியது: <b class="num">'+money(Math.round(total))+'</b><br>மொத்த வட்டி: <b class="num">'+money(Math.round(total-P))+'</b>';
+});
+$('#siBtn').addEventListener('click',()=>{
+ const P=parseFloat($('#siP').value),R=parseFloat($('#siR').value),N=parseFloat($('#siN').value),el=$('#siRes');el.hidden=false;
+ if(!(P>0)||!(N>0)||isNaN(R)||R<0){el.textContent='முதல் தொகை, வட்டி %, மாதங்கள் மூன்றையும் சரியாக உள்ளிடுக.';return;}
+ const i=P*R/100*N;
+ el.innerHTML='மொத்த வட்டி: <b class="num">'+money(Math.round(i*100)/100)+'</b><br>முதல் + வட்டி: <b class="num">'+money(Math.round((P+i)*100)/100)+'</b><br>மாத வட்டி: <b class="num">'+money(Math.round(P*R)/100)+'</b>';
+});
+let rzT;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(!$('#tab-report').hidden){drawTrend();drawDonut();}},150);});
+buildChips($('#rateChips'),$('#rate'));buildChips($('#eRateChips'),$('#eRate'));
+$('#startDate').value=key(new Date());
+document.querySelectorAll('[data-upi]').forEach(b=>b.addEventListener('click',()=>{
+ if(!payTarget)return;
+ const app=b.dataset.upi,amt=parseFloat($('#payAmount').value),vpa=$('#payUpi').value.trim(),go=$('#upiGo');
+ const a=amt>0?Math.min(amt,calc(payTarget).remain):0;
+ if(vpa){
+  if(!validUpi(vpa)){toast('சரியான UPI ID எழுதுங்க (எ.கா. name@bank)');$('#payUpi').focus();return;}
+  if(!(a>0)){toast('முதலில் தொகையை எழுதுங்க');$('#payAmount').focus();return;}
+  if(vpa!==payTarget.upiId){payTarget.upiId=vpa;save();}
+  go.href=upiUrl(app,vpa,payTarget.person,a);
+  $('#upiHint').textContent=APPN[app]+'-ல் '+money(a)+' செலுத்தி முடித்ததும் இங்கே திரும்பி "சேமி" அழுத்துங்கள்.';
+ }else{
+  const u=appOpenUrl(app);
+  if(!u){toast(APPN[app]+' தேர்வுக்கு பெறுபவர் UPI ID தேவை. அல்லது Google Pay / PhonePe / Paytm-ஐத் தேர்ந்தெடுக்கவும்.');$('#payUpi').focus();return;}
+  if(a>0&&navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(String(a)).catch(()=>{});
+  go.href=u;
+  $('#upiHint').textContent=APPN[app]+' திறந்ததும் பெறுபவரைத் தேர்ந்தெடுத்து '+(a>0?money(a)+' (தொகை நகலெடுக்கப்பட்டது) ':'')+'செலுத்துங்கள். முடிந்ததும் இங்கே திரும்பி "சேமி" அழுத்துங்கள்.';
+ }
+ payUpiUsed=app;go.click();
+ setTimeout(()=>{if(!document.hidden)toast('ஆப் திறக்கவில்லையா? அது நிறுவப்படாமல் இருக்கலாம்; வேறு ஆப்பைத் தேர்ந்தெடுக்கவும்.');},2200);
+}));
+if(hasPin())openLock('unlock');
+applyLanguage();
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
+setInterval(checkReminders,30*60*1000);
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){hiddenAt=Date.now();return;}
+ checkReminders();checkBackupBanner();
+ if(hasPin()&&hiddenAt&&Date.now()-hiddenAt>60000&&!$('#lock').classList.contains('show')){hideModals();document.documentElement.classList.add('locked');openLock('unlock');}
+ hiddenAt=0;
+});
+})();
+</script>
+</body>
+</html>
